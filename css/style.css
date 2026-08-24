@@ -71,3 +71,67 @@ h1 {
     color: #777;
     text-align: center;
 }
+.account-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    background: white;
+
+    padding: 12px 18px;
+
+    border-radius: 10px;
+
+    margin-bottom: 25px;
+
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.account-icon {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #f1f5f9;
+
+    border-radius: 50%;
+
+    font-size: 22px;
+}
+
+.account-info {
+    flex: 1;
+}
+
+.account-username {
+    font-weight: bold;
+
+    font-size: 16px;
+}
+
+.account-role {
+    font-size: 13px;
+
+    color: #777;
+}
+
+.logout-btn {
+    padding: 8px 14px;
+
+    background: #dc2626;
+
+    color: white;
+
+    text-decoration: none;
+
+    border-radius: 6px;
+
+    font-size: 14px;
+}
+
+.logout-btn:hover {
+    background: #b91c1c;
+}

@@ -1,7 +1,7 @@
 
 <?php
 $host   = 'localhost';
-$dbname = 'repair_system';
+$dbname = 'project_learning';
 $user   = 'root';
 $pass   = '';      
 
