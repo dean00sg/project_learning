@@ -3,134 +3,221 @@
 require_once "../config/db.php";
 
 
-// รับ user_id จาก URL
+// ========================================
+// รับ ID
+// ========================================
 
-$user_id = $_GET["id"];
+$user_id = intval(
+    $_GET["id"] ?? 0
+);
 
 
-// ดึงข้อมูล Login
+if ($user_id <= 0) {
+
+    die("ไม่พบ User ID");
+
+}
+
+
+// ========================================
+// ดึงข้อมูล User
+// ========================================
 
 $sql = "
-    SELECT *
+    SELECT
+        user_id,
+        username,
+        role,
+        is_active
     FROM user_accounts
     WHERE user_id = ?
+    LIMIT 1
 ";
 
+
 $stmt = $conn->prepare($sql);
+
 
 $stmt->bind_param(
     "i",
     $user_id
 );
 
+
 $stmt->execute();
 
-$result = $stmt->get_result();
 
-$user = $result->fetch_assoc();
+$result =
+    $stmt->get_result();
 
 
-// ถ้าไม่พบ User
+if ($result->num_rows == 0) {
 
-if (!$user) {
-
-    die("ไม่พบผู้ใช้งาน");
+    die("ไม่พบข้อมูลผู้ใช้งาน");
 
 }
 
 
-// ตัวแปรเริ่มต้น
+$user =
+    $result->fetch_assoc();
+
+
+// ========================================
+// กำหนดตัวแปร
+// ========================================
 
 $person = [];
 
 
-// ถ้าเป็นนักเรียน
+// ========================================
+// นักเรียน
+// ========================================
 
 if ($user["role"] == "student") {
+
 
     $sql = "
         SELECT *
         FROM user_students
         WHERE user_id = ?
+        LIMIT 1
     ";
 
+
     $stmt = $conn->prepare($sql);
+
 
     $stmt->bind_param(
         "i",
         $user_id
     );
 
+
     $stmt->execute();
 
-    $result = $stmt->get_result();
 
-    $person = $result->fetch_assoc();
+    $person_result =
+        $stmt->get_result();
+
+
+    if (
+        $person_result->num_rows > 0
+    ) {
+
+        $person =
+            $person_result->fetch_assoc();
+
+    }
 
 }
 
 
-// ถ้าเป็นบุคลากร
+// ========================================
+// บุคลากร
+// ========================================
 
 if ($user["role"] == "staff") {
+
 
     $sql = "
         SELECT *
         FROM user_staffs
         WHERE user_id = ?
+        LIMIT 1
     ";
 
+
     $stmt = $conn->prepare($sql);
+
 
     $stmt->bind_param(
         "i",
         $user_id
     );
 
+
     $stmt->execute();
 
-    $result = $stmt->get_result();
 
-    $person = $result->fetch_assoc();
+    $person_result =
+        $stmt->get_result();
+
+
+    if (
+        $person_result->num_rows > 0
+    ) {
+
+        $person =
+            $person_result->fetch_assoc();
+
+    }
 
 }
 
 ?>
 
 <!DOCTYPE html>
+
 <html lang="th">
 
 <head>
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <title>แก้ไขผู้ใช้งาน</title>
+    <title>
+        แก้ไขผู้ใช้งาน
+    </title>
 
-    <link rel="stylesheet"
-          href="../css/user.css">
+    <link
+        rel="stylesheet"
+        href="../css/user.css"
+    >
 
 </head>
 
+
 <body>
+
 
 <div class="container">
 
+
     <div class="page-header">
 
-        <h1>แก้ไขผู้ใช้งาน</h1>
+        <div>
+
+            <h1>
+                แก้ไขผู้ใช้งาน
+            </h1>
+
+        </div>
+
+
+        <a
+            href="main.php"
+            class="btn btn-secondary"
+        >
+
+            ← กลับ
+
+        </a>
 
     </div>
 
 
     <div class="card">
 
-        <form action="update.php" method="POST">
 
+        <form
+            action="update.php"
+            method="POST"
+        >
 
-            <!-- ส่ง user_id ไปด้วย -->
 
             <input
                 type="hidden"
@@ -139,21 +226,395 @@ if ($user["role"] == "staff") {
             >
 
 
-            <div class="form-section">
+            <!-- ==========================
+                 Login
+            =========================== -->
 
-                <h2>ข้อมูล Login</h2>
+            <h2>
+                ข้อมูลการเข้าสู่ระบบ
+            </h2>
+
+
+            <div class="form-group">
+
+                <label>
+                    Username
+                </label>
+
+                <input
+                    type="text"
+                    name="username"
+                    value="<?= htmlspecialchars(
+                        $user["username"]
+                    ) ?>"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Password ใหม่
+                </label>
+
+                <input
+                    type="password"
+                    name="password"
+                >
+
+                <small>
+                    หากไม่ต้องการเปลี่ยน Password
+                    ให้เว้นว่าง
+                </small>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    ประเภท
+                </label>
+
+                <input
+                    type="text"
+                    value="<?php
+
+                    if ($user["role"] == "student") {
+
+                        echo "นักเรียน";
+
+                    }
+                    elseif ($user["role"] == "staff") {
+
+                        echo "บุคลากร";
+
+                    }
+                    else {
+
+                        echo $user["role"];
+
+                    }
+
+                    ?>"
+                    readonly
+                >
+
+            </div>
+
+
+            <!-- ==========================
+                 Personal
+            =========================== -->
+
+            <h2>
+                ข้อมูลส่วนตัว
+            </h2>
+
+
+            <div class="form-group">
+
+                <label>
+                    เลขบัตรประชาชน
+                </label>
+
+                <input
+                    type="text"
+                    name="citizen_id"
+                    value="<?= htmlspecialchars(
+                        $person["citezen_id"] ?? ""
+                    ) ?>"
+                    maxlength="13"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    คำนำหน้า
+                </label>
+
+                <select
+                    name="title_name"
+                >
+
+                    <option value="">
+                        -- เลือก --
+                    </option>
+
+                    <option
+                        value="นาย"
+                        <?= (
+                            ($person["title_name"] ?? "")
+                            == "นาย"
+                        ) ? "selected" : "" ?>
+                    >
+                        นาย
+                    </option>
+
+                    <option
+                        value="นางสาว"
+                        <?= (
+                            ($person["title_name"] ?? "")
+                            == "นางสาว"
+                        ) ? "selected" : "" ?>
+                    >
+                        นางสาว
+                    </option>
+
+                    <option
+                        value="นาง"
+                        <?= (
+                            ($person["title_name"] ?? "")
+                            == "นาง"
+                        ) ? "selected" : "" ?>
+                    >
+                        นาง
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    ชื่อ
+                </label>
+
+                <input
+                    type="text"
+                    name="first_name_th"
+                    value="<?= htmlspecialchars(
+                        $person["first_name_th"] ?? ""
+                    ) ?>"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    นามสกุล
+                </label>
+
+                <input
+                    type="text"
+                    name="last_name_th"
+                    value="<?= htmlspecialchars(
+                        $person["last_name_th"] ?? ""
+                    ) ?>"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    ชื่อภาษาอังกฤษ
+                </label>
+
+                <input
+                    type="text"
+                    name="first_name_en"
+                    value="<?= htmlspecialchars(
+                        $person["first_name_en"] ?? ""
+                    ) ?>"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    นามสกุลภาษาอังกฤษ
+                </label>
+
+                <input
+                    type="text"
+                    name="last_name_en"
+                    value="<?= htmlspecialchars(
+                        $person["last_name_en"] ?? ""
+                    ) ?>"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    วันเกิด
+                </label>
+
+                <input
+                    type="date"
+                    name="birthday"
+                    value="<?= htmlspecialchars(
+                        $person["birthday"] ?? ""
+                    ) ?>"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    เพศ
+                </label>
+
+                <select
+                    name="sex"
+                >
+
+                    <option value="">
+                        -- เลือก --
+                    </option>
+
+                    <option
+                        value="M"
+                        <?= (
+                            ($person["sex"] ?? "")
+                            == "M"
+                        ) ? "selected" : "" ?>
+                    >
+                        ชาย
+                    </option>
+
+                    <option
+                        value="F"
+                        <?= (
+                            ($person["sex"] ?? "")
+                            == "F"
+                        ) ? "selected" : "" ?>
+                    >
+                        หญิง
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    name="email"
+                    value="<?= htmlspecialchars(
+                        $person["email"] ?? ""
+                    ) ?>"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    เบอร์โทรศัพท์
+                </label>
+
+                <input
+                    type="text"
+                    name="phone"
+                    value="<?= htmlspecialchars(
+                        $person["phone"] ?? ""
+                    ) ?>"
+                >
+
+            </div>
+
+
+            <!-- ==========================
+                 Student
+            =========================== -->
+
+            <?php if ($user["role"] == "student") { ?>
+
+                <h2>
+                    ข้อมูลนักเรียน
+                </h2>
 
 
                 <div class="form-group">
 
-                    <label>Username</label>
+                    <label>
+                        รหัสนักเรียน
+                    </label>
 
                     <input
                         type="text"
-                        name="username"
-                        class="form-control"
-                        value="<?= htmlspecialchars($user["username"]) ?>"
-                        required
+                        value="<?= htmlspecialchars(
+                            $person["student_code"] ?? ""
+                        ) ?>"
+                        readonly
+                    >
+
+                    <small>
+                        รหัสนักเรียนไม่สามารถแก้ไขได้
+                    </small>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        ชั้นเรียน
+                    </label>
+
+                    <input
+                        type="text"
+                        name="classroom_id"
+                        value="<?= htmlspecialchars(
+                            $person["classroom_id"] ?? ""
+                        ) ?>"
+                    >
+
+                </div>
+
+            <?php } ?>
+
+
+            <!-- ==========================
+                 Staff
+            =========================== -->
+
+            <?php if ($user["role"] == "staff") { ?>
+
+                <h2>
+                    ข้อมูลบุคลากร
+                </h2>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Staff Type Code
+                    </label>
+
+                    <input
+                        type="text"
+                        name="staff_type_code"
+                        value="<?= htmlspecialchars(
+                            $person["staff_type_code"] ?? ""
+                        ) ?>"
                     >
 
                 </div>
@@ -161,162 +622,55 @@ if ($user["role"] == "staff") {
 
                 <div class="form-group">
 
-                    <label>ประเภท</label>
+                    <label>
+                        Department Code
+                    </label>
 
-                    <select
-                        name="role"
-                        class="form-control"
-                        required
+                    <input
+                        type="text"
+                        name="department_code"
+                        value="<?= htmlspecialchars(
+                            $person["department_code"] ?? ""
+                        ) ?>"
                     >
-
-                        <option
-                            value="student"
-                            <?= $user["role"] == "student" ? "selected" : "" ?>
-                        >
-                            นักเรียน
-                        </option>
-
-                        <option
-                            value="staff"
-                            <?= $user["role"] == "staff" ? "selected" : "" ?>
-                        >
-                            บุคลากร
-                        </option>
-
-                    </select>
 
                 </div>
 
+            <?php } ?>
 
-                <div class="form-group">
 
-                    <label>สถานะ</label>
+            <!-- ==========================
+                 Status
+            =========================== -->
 
-                    <select
+            <h2>
+                สถานะ
+            </h2>
+
+
+            <div class="form-group">
+
+                <label>
+
+                    <input
+                        type="checkbox"
                         name="is_active"
-                        class="form-control"
+                        value="1"
+                        <?= $user["is_active"]
+                            ? "checked"
+                            : "" ?>
                     >
 
-                        <option
-                            value="1"
-                            <?= $user["is_active"] ? "selected" : "" ?>
-                        >
-                            ใช้งาน
-                        </option>
+                    เปิดใช้งาน
 
-                        <option
-                            value="0"
-                            <?= !$user["is_active"] ? "selected" : "" ?>
-                        >
-                            ปิดใช้งาน
-                        </option>
-
-                    </select>
-
-                </div>
+                </label>
 
             </div>
 
 
-            <!-- ข้อมูลส่วนตัว -->
-
-            <div class="form-section">
-
-                <h2>ข้อมูลส่วนตัว</h2>
-
-
-                <div class="form-row">
-
-
-                    <div class="form-group">
-
-                        <label>เลขบัตรประชาชน</label>
-
-                        <input
-                            type="text"
-                            name="citizen_id"
-                            class="form-control"
-                            value="<?= htmlspecialchars($person["citezen_id"] ?? "") ?>"
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>คำนำหน้า</label>
-
-                        <input
-                            type="text"
-                            name="title_name"
-                            class="form-control"
-                            value="<?= htmlspecialchars($person["title_name"] ?? "") ?>"
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>ชื่อ</label>
-
-                        <input
-                            type="text"
-                            name="first_name_th"
-                            class="form-control"
-                            value="<?= htmlspecialchars($person["first_name_th"] ?? "") ?>"
-                            required
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>นามสกุล</label>
-
-                        <input
-                            type="text"
-                            name="last_name_th"
-                            class="form-control"
-                            value="<?= htmlspecialchars($person["last_name_th"] ?? "") ?>"
-                            required
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>Email</label>
-
-                        <input
-                            type="email"
-                            name="email"
-                            class="form-control"
-                            value="<?= htmlspecialchars($person["email"] ?? "") ?>"
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>เบอร์โทรศัพท์</label>
-
-                        <input
-                            type="text"
-                            name="phone"
-                            class="form-control"
-                            value="<?= htmlspecialchars($person["phone"] ?? "") ?>"
-                        >
-
-                    </div>
-
-                </div>
-
-            </div>
-
+            <!-- ==========================
+                 Buttons
+            =========================== -->
 
             <div class="form-actions">
 
@@ -324,7 +678,9 @@ if ($user["role"] == "staff") {
                     type="submit"
                     class="btn btn-primary"
                 >
+
                     บันทึกการแก้ไข
+
                 </button>
 
 
@@ -332,7 +688,9 @@ if ($user["role"] == "staff") {
                     href="main.php"
                     class="btn btn-secondary"
                 >
+
                     ยกเลิก
+
                 </a>
 
             </div>
@@ -340,9 +698,12 @@ if ($user["role"] == "staff") {
 
         </form>
 
+
     </div>
 
+
 </div>
+
 
 </body>
 

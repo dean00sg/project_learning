@@ -1,290 +1,422 @@
+<?php
+
+?>
+
 <!DOCTYPE html>
+
 <html lang="th">
 
 <head>
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <title>เพิ่มผู้ใช้งาน</title>
+    <title>
+        เพิ่มผู้ใช้งาน
+    </title>
 
-    <link rel="stylesheet"
-          href="../css/user.css">
+      <link rel="stylesheet" href="../css/user.css">
 
 </head>
 
+
 <body>
+
 
 <div class="container">
 
-    <!-- หัวข้อ -->
+
+    <!-- =================================
+         Header
+    ================================== -->
 
     <div class="page-header">
 
         <div>
 
-            <h1>เพิ่มผู้ใช้งาน</h1>
+            <h1>
+                เพิ่มผู้ใช้งาน
+            </h1>
 
-            <p>กรอกข้อมูลผู้ใช้งานใหม่</p>
+            <p>
+                เพิ่มบัญชีผู้ใช้งานใหม่
+            </p>
 
         </div>
+
+
+        <a
+            href="main.php"
+            class="btn btn-secondary"
+        >
+
+            ← กลับ
+
+        </a>
 
     </div>
 
 
-    <!-- Form -->
+    <!-- =================================
+         Form
+    ================================== -->
 
     <div class="card">
 
-        <form action="store.php" method="POST">
+
+        <form
+            action="store.php"
+            method="POST"
+        >
 
 
-            <!-- =========================
-                 ข้อมูล Login
-            ========================== -->
+            <!-- ==========================
+                 Login
+            =========================== -->
 
-            <div class="form-section">
-
-                <h2>ข้อมูล Login</h2>
-
-
-                <div class="form-row">
-
-                    <div class="form-group">
-
-                        <label>
-                            Username
-                        </label>
-
-                        <input
-                            type="text"
-                            name="username"
-                            class="form-control"
-                            required
-                        >
-
-                    </div>
+            <h2>
+                ข้อมูลการเข้าสู่ระบบ
+            </h2>
 
 
-                    <div class="form-group">
+            <div class="form-group">
 
-                        <label>
-                            Password
-                        </label>
+                <label>
+                    Username
+                </label>
 
-                        <input
-                            type="password"
-                            name="password"
-                            class="form-control"
-                            required
-                        >
-
-                    </div>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>
-                        ประเภทผู้ใช้งาน
-                    </label>
-
-                    <select
-                        name="role"
-                        class="form-control"
-                        required
-                    >
-
-                        <option value="">
-                            -- เลือกประเภท --
-                        </option>
-
-                        <option value="student">
-                            นักเรียน
-                        </option>
-
-                        <option value="staff">
-                            บุคลากร
-                        </option>
-
-                    </select>
-
-                </div>
+                <input
+                    type="text"
+                    name="username"
+                    required
+                >
 
             </div>
 
 
-            <!-- =========================
+            <div class="form-group">
+
+                <label>
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    name="password"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    ประเภทผู้ใช้งาน
+                </label>
+
+                <select
+                    name="role"
+                    id="role"
+                    required
+                    onchange="changeRole()"
+                >
+
+                    <option value="">
+                        -- เลือกประเภท --
+                    </option>
+
+                    <option value="student">
+                        นักเรียน
+                    </option>
+
+                    <option value="staff">
+                        บุคลากร
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- ==========================
                  ข้อมูลส่วนตัว
-            ========================== -->
+            =========================== -->
 
-            <div class="form-section">
-
-                <h2>ข้อมูลส่วนตัว</h2>
-
-
-                <div class="form-row">
-
-                    <div class="form-group">
-
-                        <label>
-                            เลขบัตรประชาชน
-                        </label>
-
-                        <input
-                            type="text"
-                            name="citizen_id"
-                            class="form-control"
-                        >
-
-                    </div>
+            <h2>
+                ข้อมูลส่วนตัว
+            </h2>
 
 
-                    <div class="form-group">
+            <div class="form-group">
 
-                        <label>
-                            คำนำหน้า
-                        </label>
+                <label>
+                    เลขบัตรประชาชน
+                </label>
 
-                        <input
-                            type="text"
-                            name="title_name"
-                            class="form-control"
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            ชื่อ
-                        </label>
-
-                        <input
-                            type="text"
-                            name="first_name_th"
-                            class="form-control"
-                            required
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            นามสกุล
-                        </label>
-
-                        <input
-                            type="text"
-                            name="last_name_th"
-                            class="form-control"
-                            required
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            วันเกิด
-                        </label>
-
-                        <input
-                            type="date"
-                            name="birthday"
-                            class="form-control"
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            เพศ
-                        </label>
-
-                        <select
-                            name="sex"
-                            class="form-control"
-                        >
-
-                            <option value="">
-                                -- เลือกเพศ --
-                            </option>
-
-                            <option value="M">
-                                ชาย
-                            </option>
-
-                            <option value="F">
-                                หญิง
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            Email
-                        </label>
-
-                        <input
-                            type="email"
-                            name="email"
-                            class="form-control"
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            เบอร์โทรศัพท์
-                        </label>
-
-                        <input
-                            type="text"
-                            name="phone"
-                            class="form-control"
-                        >
-
-                    </div>
-
-                </div>
+                <input
+                    type="text"
+                    name="citizen_id"
+                    maxlength="13"
+                >
 
             </div>
 
 
-            <!-- =========================
-                 ข้อมูลนักเรียน
-            ========================== -->
+            <div class="form-group">
 
-            <div class="form-section">
+                <label>
+                    คำนำหน้า
+                </label>
 
-                <h2>ข้อมูลนักเรียน</h2>
+                <select
+                    name="title_name"
+                >
+
+                    <option value="">
+                        -- เลือกคำนำหน้า --
+                    </option>
+
+                    <option value="นาย">
+                        นาย
+                    </option>
+
+                    <option value="นางสาว">
+                        นางสาว
+                    </option>
+
+                    <option value="นาง">
+                        นาง
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    ชื่อ
+                </label>
+
+                <input
+                    type="text"
+                    name="first_name_th"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    นามสกุล
+                </label>
+
+                <input
+                    type="text"
+                    name="last_name_th"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    ชื่อภาษาอังกฤษ
+                </label>
+
+                <input
+                    type="text"
+                    name="first_name_en"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    นามสกุลภาษาอังกฤษ
+                </label>
+
+                <input
+                    type="text"
+                    name="last_name_en"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    วันเกิด
+                </label>
+
+                <input
+                    type="date"
+                    name="birthday"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    เพศ
+                </label>
+
+                <select
+                    name="sex"
+                >
+
+                    <option value="">
+                        -- เลือก --
+                    </option>
+
+                    <option value="M">
+                        ชาย
+                    </option>
+
+                    <option value="F">
+                        หญิง
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    name="email"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    เบอร์โทรศัพท์
+                </label>
+
+                <input
+                    type="text"
+                    name="phone"
+                >
+
+            </div>
+
+
+            <!-- ==========================
+                 นักเรียน
+            =========================== -->
+
+            <div
+                id="student-section"
+                style="display:none;"
+            >
+
+                <h2>
+                    ข้อมูลนักเรียน
+                </h2>
+
 
                 <div class="form-group">
 
                     <label>
-                        Classroom ID
+                        ชั้นเรียน
                     </label>
 
                     <input
                         type="text"
                         name="classroom_id"
-                        class="form-control"
+                    >
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <strong>
+                        รหัสนักเรียนจะถูกสร้างอัตโนมัติ
+                    </strong>
+
+                    <br>
+
+                    รูปแบบ:
+
+                    <code>
+                        ปี + คำนำหน้า + กลุ่มอักษร + 3 ตัวท้ายบัตรประชาชน
+                    </code>
+
+                    <br><br>
+
+                    ตัวอย่าง:
+
+                    <code>
+                        690101123
+                    </code>
+
+                </div>
+
+            </div>
+
+
+            <!-- ==========================
+                 บุคลากร
+            =========================== -->
+
+            <div
+                id="staff-section"
+                style="display:none;"
+            >
+
+                <h2>
+                    ข้อมูลบุคลากร
+                </h2>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Staff Type Code
+                    </label>
+
+                    <input
+                        type="text"
+                        name="staff_type_code"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Department Code
+                    </label>
+
+                    <input
+                        type="text"
+                        name="department_code"
                     >
 
                 </div>
@@ -292,54 +424,9 @@
             </div>
 
 
-            <!-- =========================
-                 ข้อมูลบุคลากร
-            ========================== -->
-
-            <div class="form-section">
-
-                <h2>ข้อมูลบุคลากร</h2>
-
-
-                <div class="form-row">
-
-                    <div class="form-group">
-
-                        <label>
-                            Staff Type Code
-                        </label>
-
-                        <input
-                            type="text"
-                            name="staff_type_code"
-                            class="form-control"
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            Department Code
-                        </label>
-
-                        <input
-                            type="text"
-                            name="department_code"
-                            class="form-control"
-                        >
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- =========================
-                 ปุ่ม
-            ========================== -->
+            <!-- ==========================
+                 Button
+            =========================== -->
 
             <div class="form-actions">
 
@@ -347,7 +434,9 @@
                     type="submit"
                     class="btn btn-primary"
                 >
+
                     บันทึก
+
                 </button>
 
 
@@ -355,7 +444,9 @@
                     href="main.php"
                     class="btn btn-secondary"
                 >
+
                     ยกเลิก
+
                 </a>
 
             </div>
@@ -363,9 +454,52 @@
 
         </form>
 
+
     </div>
 
+
 </div>
+
+
+<script>
+
+function changeRole()
+{
+
+    const role =
+        document.getElementById("role").value;
+
+
+    const studentSection =
+        document.getElementById("student-section");
+
+
+    const staffSection =
+        document.getElementById("staff-section");
+
+
+    studentSection.style.display = "none";
+
+    staffSection.style.display = "none";
+
+
+    if (role === "student") {
+
+        studentSection.style.display = "block";
+
+    }
+
+
+    if (role === "staff") {
+
+        staffSection.style.display = "block";
+
+    }
+
+}
+
+</script>
+
 
 </body>
 

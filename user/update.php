@@ -3,128 +3,390 @@
 require_once "../config/db.php";
 
 
-// =================================
-// รับข้อมูลจาก edit.php
-// =================================
+// ========================================
+// รับข้อมูล
+// ========================================
 
-$user_id = $_POST["user_id"];
+$user_id = intval(
+    $_POST["user_id"] ?? 0
+);
 
-$username = $_POST["username"];
-$role = $_POST["role"];
-$is_active = $_POST["is_active"];
+$username = trim(
+    $_POST["username"] ?? ""
+);
 
-$citizen_id = $_POST["citizen_id"];
-$title_name = $_POST["title_name"];
+$password = $_POST["password"] ?? "";
 
-$first_name_th = $_POST["first_name_th"];
-$last_name_th = $_POST["last_name_th"];
+$citizen_id = trim(
+    $_POST["citizen_id"] ?? ""
+);
 
-$email = $_POST["email"];
-$phone = $_POST["phone"];
+$title_name = trim(
+    $_POST["title_name"] ?? ""
+);
+
+$first_name_th = trim(
+    $_POST["first_name_th"] ?? ""
+);
+
+$first_name_en = trim(
+    $_POST["first_name_en"] ?? ""
+);
+
+$last_name_th = trim(
+    $_POST["last_name_th"] ?? ""
+);
+
+$last_name_en = trim(
+    $_POST["last_name_en"] ?? ""
+);
+
+$birthday = $_POST["birthday"] ?? null;
+
+$sex = $_POST["sex"] ?? "";
+
+$email = trim(
+    $_POST["email"] ?? ""
+);
+
+$phone = trim(
+    $_POST["phone"] ?? ""
+);
+
+$classroom_id = trim(
+    $_POST["classroom_id"] ?? ""
+);
+
+$staff_type_code = trim(
+    $_POST["staff_type_code"] ?? ""
+);
+
+$department_code = trim(
+    $_POST["department_code"] ?? ""
+);
+
+$is_active =
+    isset($_POST["is_active"])
+    ? 1
+    : 0;
 
 
-// =================================
-// แก้ไขข้อมูล user_accounts
-// =================================
+// ========================================
+// ตรวจสอบ
+// ========================================
+
+if ($user_id <= 0) {
+
+    die("User ID ไม่ถูกต้อง");
+
+}
+
+
+if ($username == "") {
+
+    die("กรุณากรอก Username");
+
+}
+
+
+// ========================================
+// ตรวจสอบ User
+// ========================================
 
 $sql = "
-    UPDATE user_accounts
-    SET
-        username = ?,
-        role = ?,
-        is_active = ?
+    SELECT
+        user_id,
+        role
+    FROM user_accounts
     WHERE user_id = ?
+    LIMIT 1
 ";
+
 
 $stmt = $conn->prepare($sql);
 
+
 $stmt->bind_param(
-    "ssii",
-    $username,
-    $role,
-    $is_active,
+    "i",
     $user_id
 );
+
 
 $stmt->execute();
 
 
-// =================================
-// ถ้าเป็นนักเรียน
-// =================================
+$result =
+    $stmt->get_result();
 
-if ($role == "student") {
 
-    $sql = "
-        UPDATE user_students
-        SET
-            citezen_id = ?,
-            title_name = ?,
-            first_name_th = ?,
-            last_name_th = ?,
-            email = ?,
-            phone = ?
-        WHERE user_id = ?
-    ";
+if ($result->num_rows == 0) {
 
-    $stmt = $conn->prepare($sql);
+    die("ไม่พบข้อมูลผู้ใช้งาน");
 
-    $stmt->bind_param(
-        "ssssssi",
-        $citizen_id,
-        $title_name,
-        $first_name_th,
-        $last_name_th,
-        $email,
-        $phone,
-        $user_id
-    );
-
-    $stmt->execute();
 }
 
 
-// =================================
-// ถ้าเป็นบุคลากร
-// =================================
+$user =
+    $result->fetch_assoc();
 
-if ($role == "staff") {
 
-    $sql = "
-        UPDATE user_staffs
-        SET
-            citezen_id = ?,
-            title_name = ?,
-            first_name_th = ?,
-            last_name_th = ?,
-            email = ?,
-            phone = ?
-        WHERE user_id = ?
-    ";
+$role =
+    $user["role"];
 
-    $stmt = $conn->prepare($sql);
 
-    $stmt->bind_param(
-        "ssssssi",
-        $citizen_id,
-        $title_name,
-        $first_name_th,
-        $last_name_th,
-        $email,
-        $phone,
-        $user_id
-    );
+// ========================================
+// ตรวจสอบ Username ซ้ำ
+// ========================================
 
-    $stmt->execute();
+$sql = "
+    SELECT
+        user_id
+    FROM user_accounts
+    WHERE username = ?
+    AND user_id != ?
+    LIMIT 1
+";
+
+
+$stmt = $conn->prepare($sql);
+
+
+$stmt->bind_param(
+    "si",
+    $username,
+    $user_id
+);
+
+
+$stmt->execute();
+
+
+$result =
+    $stmt->get_result();
+
+
+if ($result->num_rows > 0) {
+
+    die("Username นี้มีผู้ใช้งานแล้ว");
+
 }
 
 
-// =================================
-// กลับหน้า main
-// =================================
+// ========================================
+// Transaction
+// ========================================
 
-header("Location: main.php");
+$conn->begin_transaction();
 
-exit;
+
+try {
+
+
+    // ====================================
+    // Update User Account
+    // ====================================
+
+    if ($password != "") {
+
+
+        // ถ้ามี Password ใหม่
+
+        $password_hash =
+            password_hash(
+                $password,
+                PASSWORD_DEFAULT
+            );
+
+
+        $sql = "
+            UPDATE user_accounts
+            SET
+                username = ?,
+                password_hash = ?,
+                is_active = ?
+            WHERE user_id = ?
+        ";
+
+
+        $stmt =
+            $conn->prepare($sql);
+
+
+        $stmt->bind_param(
+            "ssii",
+            $username,
+            $password_hash,
+            $is_active,
+            $user_id
+        );
+
+
+        $stmt->execute();
+
+    }
+    else {
+
+
+        // ถ้าไม่เปลี่ยน Password
+
+        $sql = "
+            UPDATE user_accounts
+            SET
+                username = ?,
+                is_active = ?
+            WHERE user_id = ?
+        ";
+
+
+        $stmt =
+            $conn->prepare($sql);
+
+
+        $stmt->bind_param(
+            "sii",
+            $username,
+            $is_active,
+            $user_id
+        );
+
+
+        $stmt->execute();
+
+    }
+
+
+    // ====================================
+    // STUDENT
+    // ====================================
+
+    if ($role == "student") {
+
+
+        $sql = "
+            UPDATE user_students
+            SET
+                citezen_id = ?,
+                title_name = ?,
+                first_name_th = ?,
+                first_name_en = ?,
+                last_name_th = ?,
+                last_name_en = ?,
+                birthday = ?,
+                sex = ?,
+                email = ?,
+                phone = ?,
+                classroom_id = ?
+            WHERE user_id = ?
+        ";
+
+
+        $stmt =
+            $conn->prepare($sql);
+
+
+        $stmt->bind_param(
+            "sssssssssssi",
+            $citizen_id,
+            $title_name,
+            $first_name_th,
+            $first_name_en,
+            $last_name_th,
+            $last_name_en,
+            $birthday,
+            $sex,
+            $email,
+            $phone,
+            $classroom_id,
+            $user_id
+        );
+
+
+        $stmt->execute();
+
+    }
+
+
+    // ====================================
+    // STAFF
+    // ====================================
+
+    elseif ($role == "staff") {
+
+
+        $sql = "
+            UPDATE user_staffs
+            SET
+                staff_type_code = ?,
+                citezen_id = ?,
+                title_name = ?,
+                first_name_th = ?,
+                first_name_en = ?,
+                last_name_th = ?,
+                last_name_en = ?,
+                birthday = ?,
+                sex = ?,
+                email = ?,
+                phone = ?,
+                department_code = ?
+            WHERE user_id = ?
+        ";
+
+
+        $stmt =
+            $conn->prepare($sql);
+
+
+        $stmt->bind_param(
+            "ssssssssssssi",
+            $staff_type_code,
+            $citizen_id,
+            $title_name,
+            $first_name_th,
+            $first_name_en,
+            $last_name_th,
+            $last_name_en,
+            $birthday,
+            $sex,
+            $email,
+            $phone,
+            $department_code,
+            $user_id
+        );
+
+
+        $stmt->execute();
+
+    }
+
+
+    // ====================================
+    // Commit
+    // ====================================
+
+    $conn->commit();
+
+
+    header(
+        "Location: main.php"
+    );
+
+    exit;
+
+
+}
+catch (Exception $e) {
+
+
+    $conn->rollback();
+
+
+    die(
+        "เกิดข้อผิดพลาด: "
+        . htmlspecialchars(
+            $e->getMessage()
+        )
+    );
+
+}
 
 ?>

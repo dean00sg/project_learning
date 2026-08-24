@@ -1,71 +1,96 @@
 <?php
 
-session_start();
-
-
-// ตรวจสอบว่ Login แล้วหรือยัง
-
-if (!isset($_SESSION["user_id"])) {
-
-    header("Location: ../login/index.php");
-
-    exit;
-}
-
-
 require_once "../config/db.php";
+
+
+// ========================================
+// ดึงข้อมูลผู้ใช้งาน
+// ========================================
 
 $sql = "
     SELECT
-        user_id,
-        username,
-        role,
-        is_active
-    FROM user_accounts
-    ORDER BY user_id DESC
+        ua.user_id,
+        ua.username,
+        ua.role,
+        ua.is_active,
+
+        us.student_code,
+        us.first_name_th AS student_first_name,
+        us.last_name_th AS student_last_name,
+
+        ust.first_name_th AS staff_first_name,
+        ust.last_name_th AS staff_last_name
+
+    FROM user_accounts ua
+
+    LEFT JOIN user_students us
+        ON us.user_id = ua.user_id
+
+    LEFT JOIN user_staffs ust
+        ON ust.user_id = ua.user_id
+
+    ORDER BY ua.user_id DESC
 ";
+
 
 $result = $conn->query($sql);
 
 ?>
 
 <!DOCTYPE html>
+
 <html lang="th">
 
 <head>
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <title>จัดการผู้ใช้งาน</title>
+    <title>
+        จัดการผู้ใช้งาน
+    </title>
 
-    <link rel="stylesheet"
-          href="../css/user.css">
+    <link
+        rel="stylesheet"
+        href="../css/user.css"
+    >
 
 </head>
 
+
 <body>
+
 
 <div class="container">
 
 
-    <!-- หัวข้อ -->
+    <!-- =================================
+         Header
+    ================================== -->
 
     <div class="page-header">
 
         <div>
 
-            <h1>จัดการผู้ใช้งาน</h1>
+            <h1>
+                จัดการผู้ใช้งาน
+            </h1>
 
-            <p>รายการบัญชีผู้ใช้งานในระบบ</p>
+            <p>
+                เพิ่ม แก้ไข และจัดการข้อมูลผู้ใช้งาน
+            </p>
 
         </div>
 
 
-        <a href="create.php"
-           class="btn btn-primary">
+        <a
+            href="create.php"
+            class="btn btn-primary"
+        >
 
             + เพิ่มผู้ใช้งาน
 
@@ -74,7 +99,9 @@ $result = $conn->query($sql);
     </div>
 
 
-    <!-- ตาราง -->
+    <!-- =================================
+         ตาราง
+    ================================== -->
 
     <div class="card">
 
@@ -86,13 +113,29 @@ $result = $conn->query($sql);
 
                     <th>ID</th>
 
-                    <th>Username</th>
+                    <th>
+                        รหัสนักเรียน
+                    </th>
 
-                    <th>ประเภท</th>
+                    <th>
+                        Username
+                    </th>
 
-                    <th>สถานะ</th>
+                    <th>
+                        ชื่อ - นามสกุล
+                    </th>
 
-                    <th>จัดการ</th>
+                    <th>
+                        ประเภท
+                    </th>
+
+                    <th>
+                        สถานะ
+                    </th>
+
+                    <th>
+                        จัดการ
+                    </th>
 
                 </tr>
 
@@ -101,10 +144,12 @@ $result = $conn->query($sql);
 
             <tbody>
 
+
             <?php if ($result->num_rows > 0) { ?>
 
 
                 <?php while ($row = $result->fetch_assoc()) { ?>
+
 
                     <tr>
 
@@ -120,6 +165,29 @@ $result = $conn->query($sql);
                         </td>
 
 
+                        <!-- Student Code -->
+
+                        <td>
+
+                            <?php
+
+                            if ($row["role"] == "student") {
+
+                                echo htmlspecialchars(
+                                    $row["student_code"] ?? "-"
+                                );
+
+                            } else {
+
+                                echo "-";
+
+                            }
+
+                            ?>
+
+                        </td>
+
+
                         <!-- Username -->
 
                         <td>
@@ -127,6 +195,45 @@ $result = $conn->query($sql);
                             <?= htmlspecialchars(
                                 $row["username"]
                             ) ?>
+
+                        </td>
+
+
+                        <!-- Name -->
+
+                        <td>
+
+                            <?php
+
+                            if ($row["role"] == "student") {
+
+                                echo htmlspecialchars(
+                                    trim(
+                                        ($row["student_first_name"] ?? "")
+                                        . " "
+                                        . ($row["student_last_name"] ?? "")
+                                    )
+                                );
+
+                            }
+                            elseif ($row["role"] == "staff") {
+
+                                echo htmlspecialchars(
+                                    trim(
+                                        ($row["staff_first_name"] ?? "")
+                                        . " "
+                                        . ($row["staff_last_name"] ?? "")
+                                    )
+                                );
+
+                            }
+                            else {
+
+                                echo "-";
+
+                            }
+
+                            ?>
 
                         </td>
 
@@ -141,11 +248,18 @@ $result = $conn->query($sql);
 
                                 echo "นักเรียน";
 
-                            } elseif ($row["role"] == "staff") {
+                            }
+                            elseif ($row["role"] == "staff") {
 
                                 echo "บุคลากร";
 
-                            } else {
+                            }
+                            elseif ($row["role"] == "admin") {
+
+                                echo "ผู้ดูแลระบบ";
+
+                            }
+                            else {
 
                                 echo htmlspecialchars(
                                     $row["role"]
@@ -158,20 +272,24 @@ $result = $conn->query($sql);
                         </td>
 
 
-                        <!-- สถานะ -->
+                        <!-- Status -->
 
                         <td>
 
                             <?php if ($row["is_active"]) { ?>
 
                                 <span class="status-active">
+
                                     ใช้งาน
+
                                 </span>
 
                             <?php } else { ?>
 
                                 <span class="status-inactive">
+
                                     ปิดใช้งาน
+
                                 </span>
 
                             <?php } ?>
@@ -179,7 +297,7 @@ $result = $conn->query($sql);
                         </td>
 
 
-                        <!-- จัดการ -->
+                        <!-- Edit -->
 
                         <td>
 
@@ -187,7 +305,9 @@ $result = $conn->query($sql);
                                 href="edit.php?id=<?= $row["user_id"] ?>"
                                 class="btn btn-edit"
                             >
+
                                 แก้ไข
+
                             </a>
 
                         </td>
@@ -195,21 +315,26 @@ $result = $conn->query($sql);
 
                     </tr>
 
+
                 <?php } ?>
 
 
             <?php } else { ?>
 
+
                 <tr>
 
                     <td
-                        colspan="5"
+                        colspan="7"
                         class="no-data"
                     >
-                        ยังไม่มีผู้ใช้งาน
+
+                        ยังไม่มีข้อมูลผู้ใช้งาน
+
                     </td>
 
                 </tr>
+
 
             <?php } ?>
 
@@ -220,7 +345,9 @@ $result = $conn->query($sql);
 
     </div>
 
+
 </div>
+
 
 </body>
 
