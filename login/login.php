@@ -4,6 +4,9 @@ session_start();
 
 require_once "../config/db.php";
 
+// ตารางที่ใช้ในไฟล์นี้: user_accounts, user_students, user_staffs
+// โครงสร้างตารางแบบเต็มดูได้ที่ database/schema.sql
+
 
 // ========================================
 // รับข้อมูลจากหน้า Login

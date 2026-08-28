@@ -572,6 +572,40 @@
     overflow-x: auto;
 }
 
+.approve-btn {
+    padding: 7px 14px;
+
+    border: none;
+    border-radius: 6px;
+
+    background: #16a34a;
+
+    color: #ffffff;
+
+    font-family: inherit;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.approve-btn:hover {
+    background: #15803d;
+}
+
+.empty-data {
+    text-align: center;
+
+    padding: 30px 12px;
+
+    color: #9999a5;
+
+    font-size: 13px;
+}
+
 table {
     width: 100%;
 
@@ -621,6 +655,12 @@ td {
     background: #fff4d8;
 
     color: #a87500;
+}
+
+.status.approved {
+    background: #f0fdf4;
+
+    color: #15803d;
 }
 
 .status.repairing {

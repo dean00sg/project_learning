@@ -1,6 +1,23 @@
 <?php
 
+session_start();
+
+// =====================================================
+// ตรวจสอบสิทธิ์: เฉพาะบุคลากร (staff) และผู้ดูแลระบบ (admin)
+// =====================================================
+
+if (
+    !isset($_SESSION['user_id']) ||
+    !in_array($_SESSION['role'] ?? '', ['staff', 'admin'], true)
+) {
+    header("Location: ../login/index.php");
+    exit;
+}
+
 require_once "../config/db.php";
+
+// ตารางที่ใช้ในไฟล์นี้: user_accounts, user_students, user_staffs
+// โครงสร้างตารางแบบเต็มดูได้ที่ database/schema.sql
 
 
 // ========================================

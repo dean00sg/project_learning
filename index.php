@@ -181,7 +181,7 @@ $css_path = "css/style.css";
              จัดการผู้ใช้งาน
         =============================== -->
 
-        <?php if ($role == "student") { ?>
+        <?php if ($role == "staff" || $role == "admin") { ?>
 
             <a
                 href="user/main.php"

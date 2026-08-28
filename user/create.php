@@ -1,5 +1,19 @@
 <?php
 
+session_start();
+
+// =====================================================
+// ตรวจสอบสิทธิ์: เฉพาะบุคลากร (staff) และผู้ดูแลระบบ (admin)
+// =====================================================
+
+if (
+    !isset($_SESSION['user_id']) ||
+    !in_array($_SESSION['role'] ?? '', ['staff', 'admin'], true)
+) {
+    header("Location: ../login/index.php");
+    exit;
+}
+
 ?>
 
 <!DOCTYPE html>
