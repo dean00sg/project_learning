@@ -1,0 +1,707 @@
+/* =====================================================
+   REPAIR REQUEST
+===================================================== */
+
+.repair-page {
+    min-height: 100vh;
+    background: #f5f7fb;
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+.repair-header {
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.header-inner {
+    max-width: 1200px;
+    margin: auto;
+    padding: 18px 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.header-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.brand-icon {
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: #f0e7ff;
+
+    font-size: 24px;
+}
+
+.header-brand h1 {
+    margin: 0;
+
+    font-size: 21px;
+    font-weight: 700;
+
+    color: #25253a;
+}
+
+.header-brand span {
+    display: block;
+
+    margin-top: 3px;
+
+    color: #8b8b9a;
+
+    font-size: 12px;
+}
+
+.back-home {
+    text-decoration: none;
+
+    padding: 9px 15px;
+
+    border: 1px solid #e3e3ea;
+    border-radius: 8px;
+
+    color: #555566;
+
+    background: #fff;
+
+    transition: 0.2s;
+}
+
+.back-home:hover {
+    background: #f7f3ff;
+    color: #6b3fa0;
+}
+
+
+/* =========================
+   CONTAINER
+========================= */
+
+.repair-container {
+    max-width: 1050px;
+
+    margin: auto;
+
+    padding: 35px 20px 60px;
+}
+
+
+/* =========================
+   PAGE HEADING
+========================= */
+
+.page-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+
+    margin-bottom: 25px;
+}
+
+.page-heading h2 {
+    margin: 0 0 7px;
+
+    font-size: 28px;
+
+    color: #272739;
+}
+
+.page-heading p {
+    margin: 0;
+
+    color: #777889;
+
+    font-size: 14px;
+}
+
+.history-btn {
+    text-decoration: none;
+
+    padding: 11px 16px;
+
+    border: 1px solid #ded7e9;
+
+    border-radius: 8px;
+
+    color: #6b3fa0;
+
+    background: #ffffff;
+
+    font-size: 14px;
+}
+
+.history-btn:hover {
+    background: #f7f3ff;
+}
+
+
+/* =========================
+   CARD
+========================= */
+
+.repair-card,
+.recent-card {
+    background: #ffffff;
+
+    border: 1px solid #e6e7ed;
+
+    border-radius: 14px;
+
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.04);
+}
+
+.repair-card {
+    padding: 30px;
+}
+
+
+/* =========================
+   CARD TITLE
+========================= */
+
+.card-title {
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    padding-bottom: 25px;
+
+    border-bottom: 1px solid #eeeeef;
+
+    margin-bottom: 28px;
+}
+
+.title-icon {
+    width: 46px;
+    height: 46px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #f0e7ff;
+
+    border-radius: 10px;
+
+    font-size: 22px;
+}
+
+.card-title h3 {
+    margin: 0 0 4px;
+
+    color: #29293b;
+
+    font-size: 18px;
+}
+
+.card-title p {
+    margin: 0;
+
+    color: #888894;
+
+    font-size: 13px;
+}
+
+
+/* =========================
+   SECTION
+========================= */
+
+.section-title {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin: 28px 0 18px;
+
+    color: #353546;
+
+    font-size: 16px;
+
+    font-weight: 700;
+}
+
+.section-title span {
+    width: 28px;
+    height: 28px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #6b3fa0;
+
+    color: white;
+
+    font-size: 12px;
+}
+
+
+/* =========================
+   FORM
+========================= */
+
+.form-grid {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #444456;
+
+    font-size: 14px;
+
+    font-weight: 600;
+}
+
+.required {
+    color: #d9534f;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 12px 13px;
+
+    border: 1px solid #dcdde5;
+
+    border-radius: 8px;
+
+    outline: none;
+
+    background: #ffffff;
+
+    color: #333341;
+
+    font-family: inherit;
+
+    font-size: 14px;
+
+    transition: 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #8b62b8;
+
+    box-shadow: 0 0 0 3px rgba(107, 63, 160, 0.08);
+}
+
+.form-group textarea {
+    resize: vertical;
+
+    min-height: 130px;
+}
+
+.input-help {
+    margin-top: 7px;
+
+    color: #9999a5;
+
+    font-size: 12px;
+}
+
+
+/* =========================
+   UPLOAD
+========================= */
+
+.upload-box {
+    display: flex;
+
+    align-items: center;
+
+    gap: 18px;
+
+    padding: 20px;
+
+    border: 1px dashed #cfc6dc;
+
+    border-radius: 10px;
+
+    background: #faf8fc;
+}
+
+.upload-icon {
+    width: 50px;
+    height: 50px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #eee7f6;
+
+    border-radius: 10px;
+
+    font-size: 22px;
+}
+
+.upload-text {
+    flex: 1;
+}
+
+.upload-text strong {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #444456;
+}
+
+.upload-text p {
+    margin: 0 0 3px;
+
+    color: #777785;
+
+    font-size: 13px;
+}
+
+.upload-text span {
+    color: #a0a0aa;
+
+    font-size: 11px;
+}
+
+.upload-btn {
+    cursor: pointer;
+
+    padding: 10px 16px;
+
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    border: 1px solid #cfc7da;
+
+    color: #6b3fa0;
+
+    font-size: 13px;
+
+    font-weight: 600;
+}
+
+.upload-btn:hover {
+    background: #f3edfa;
+}
+
+
+/* =========================
+   NOTICE
+========================= */
+
+.notice-box {
+    display: flex;
+
+    gap: 12px;
+
+    margin-top: 25px;
+
+    padding: 15px;
+
+    border-radius: 9px;
+
+    background: #f7f8fb;
+
+    border: 1px solid #e7e8ed;
+}
+
+.notice-icon {
+    font-size: 18px;
+}
+
+.notice-box strong {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: #4b4b5b;
+
+    font-size: 13px;
+}
+
+.notice-box p {
+    margin: 0;
+
+    color: #777783;
+
+    font-size: 12px;
+
+    line-height: 1.6;
+}
+
+
+/* =========================
+   BUTTON
+========================= */
+
+.form-actions {
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    margin-top: 28px;
+
+    padding-top: 22px;
+
+    border-top: 1px solid #eeeeef;
+}
+
+.cancel-btn,
+.submit-btn {
+    padding: 11px 22px;
+
+    border-radius: 8px;
+
+    font-family: inherit;
+
+    font-size: 14px;
+
+    text-decoration: none;
+
+    cursor: pointer;
+}
+
+.cancel-btn {
+    background: #ffffff;
+
+    border: 1px solid #dddddf;
+
+    color: #666675;
+}
+
+.submit-btn {
+    border: none;
+
+    background: #6b3fa0;
+
+    color: white;
+
+    font-weight: 600;
+}
+
+.submit-btn:hover {
+    background: #593187;
+}
+
+
+/* =========================
+   RECENT TABLE
+========================= */
+
+.recent-card {
+    margin-top: 25px;
+
+    padding: 25px;
+}
+
+.recent-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 18px;
+}
+
+.recent-header h3 {
+    margin: 0 0 5px;
+
+    color: #333344;
+
+    font-size: 17px;
+}
+
+.recent-header p {
+    margin: 0;
+
+    color: #92929c;
+
+    font-size: 12px;
+}
+
+.recent-header a {
+    color: #6b3fa0;
+
+    text-decoration: none;
+
+    font-size: 13px;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    font-size: 13px;
+}
+
+th {
+    padding: 12px;
+
+    text-align: left;
+
+    background: #f8f8fa;
+
+    color: #686875;
+
+    font-weight: 600;
+}
+
+td {
+    padding: 13px 12px;
+
+    border-top: 1px solid #eeeeef;
+
+    color: #555562;
+}
+
+
+/* =========================
+   STATUS
+========================= */
+
+.status {
+    display: inline-block;
+
+    padding: 5px 10px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+}
+
+.status.waiting {
+    background: #fff4d8;
+
+    color: #a87500;
+}
+
+.status.repairing {
+    background: #e9f2ff;
+
+    color: #3270ad;
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 768px) {
+
+    .header-inner {
+        padding: 15px;
+    }
+
+    .header-brand h1 {
+        font-size: 17px;
+    }
+
+    .header-brand span {
+        display: none;
+    }
+
+    .back-home {
+        font-size: 12px;
+    }
+
+    .repair-container {
+        padding: 25px 15px;
+    }
+
+    .page-heading {
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 15px;
+    }
+
+    .page-heading h2 {
+        font-size: 23px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .repair-card {
+        padding: 20px;
+    }
+
+    .upload-box {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .upload-btn {
+        width: 100%;
+
+        text-align: center;
+
+        box-sizing: border-box;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .cancel-btn,
+    .submit-btn {
+        width: 100%;
+
+        text-align: center;
+
+        box-sizing: border-box;
+    }
+
+}
