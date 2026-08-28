@@ -8,7 +8,7 @@ $css_path   = "../css/repair.css";
 require_once "../config/db.php";
 
 // ตารางที่ใช้ในไฟล์นี้: user_accounts, user_students, user_staffs,
-//                     classroom, repair_requests
+//                     classroom, repair_requests, repair_process
 // โครงสร้างตารางแบบเต็มดูได้ที่ database/schema.sql
 
 if (!isset($_SESSION['user_id'])) {
@@ -89,11 +89,14 @@ if ($is_student) {
 
             c.classroom_number_code,
 
-            us.title_name, us.first_name_th, us.last_name_th
+            us.title_name, us.first_name_th, us.last_name_th,
+
+            rp.status_repair
 
         FROM repair_requests r
         LEFT JOIN classroom c ON c.classroom_id = r.classroom_id
         LEFT JOIN user_students us ON us.user_id = r.requester_id
+        LEFT JOIN repair_process rp ON rp.request_id = r.request_id
         WHERE r.requester_id = ?
         ORDER BY r.request_datetime DESC
     ";
@@ -121,12 +124,15 @@ if ($is_student) {
 
             ust.title_name AS staff_title,
             ust.first_name_th AS staff_first_name,
-            ust.last_name_th AS staff_last_name
+            ust.last_name_th AS staff_last_name,
+
+            rp.status_repair
 
         FROM repair_requests r
         INNER JOIN classroom c ON c.classroom_id = r.classroom_id
         LEFT JOIN user_students us ON us.user_id = r.requester_id
         LEFT JOIN user_staffs ust ON ust.user_id = r.requester_id
+        LEFT JOIN repair_process rp ON rp.request_id = r.request_id
         WHERE
             r.requester_id = ?
             OR (
@@ -224,7 +230,13 @@ $stmt->close();
                                     $requester = "-";
                                 }
 
-                                if (!empty($request['approved_by'])) {
+                                if ($request['status_repair'] === 'done') {
+                                    $status_text  = "ซ่อมเสร็จสิ้น";
+                                    $status_class = "done";
+                                } elseif ($request['status_repair'] === 'repairing') {
+                                    $status_text  = "กำลังซ่อม";
+                                    $status_class = "repairing";
+                                } elseif (!empty($request['approved_by'])) {
                                     $status_text  = "อนุมัติแล้ว";
                                     $status_class = "approved";
                                 } else {

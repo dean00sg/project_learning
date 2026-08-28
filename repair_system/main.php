@@ -8,7 +8,7 @@ $css_path   = "../css/repair.css";
 require_once "../config/db.php";
 
 // ตารางที่ใช้ในไฟล์นี้: user_accounts, user_students, user_staffs,
-//                     classroom, repair_requests
+//                     classroom, repair_requests, repair_process
 // โครงสร้างตารางแบบเต็มดูได้ที่ database/schema.sql
 
 // =====================================================
@@ -46,8 +46,16 @@ function getRequestTypeName($type)
     return $types[$type] ?? $type;
 }
 
-function getRepairStatus($approved_by)
+function getRepairStatus($approved_by, $status_repair)
 {
+    if ($status_repair === 'done') {
+        return ["text" => "ซ่อมเสร็จสิ้น", "class" => "done"];
+    }
+
+    if ($status_repair === 'repairing') {
+        return ["text" => "กำลังซ่อม", "class" => "repairing"];
+    }
+
     if (!empty($approved_by)) {
         return ["text" => "อนุมัติแล้ว", "class" => "approved"];
     }
@@ -100,7 +108,7 @@ $sql = "
         us.last_name_th AS student_last_name,
         us.classroom_id AS student_classroom_id,
 
-        ust.staff_id, ust.title_name AS staff_title,
+        ust.staff_id, ust.staff_type_code, ust.title_name AS staff_title,
         ust.first_name_th AS staff_first_name,
         ust.last_name_th AS staff_last_name
 
@@ -140,8 +148,9 @@ if ((int)$user['is_active'] !== 1) {
 // ตรวจสอบประเภทผู้ใช้
 // =====================================================
 
-$is_student = !empty($user['student_id']);
-$is_staff   = !empty($user['staff_id']);
+$is_student    = !empty($user['student_id']);
+$is_staff      = !empty($user['staff_id']);
+$is_technician = $is_staff && ($user['staff_type_code'] ?? '') === 'technician';
 
 // =====================================================
 // ชื่อผู้ใช้งาน
@@ -247,7 +256,9 @@ $select_columns = "
 
     ust.staff_id AS requester_staff_id, ust.title_name AS requester_staff_title,
     ust.first_name_th AS requester_staff_first_name,
-    ust.last_name_th AS requester_staff_last_name
+    ust.last_name_th AS requester_staff_last_name,
+
+    rp.status_repair
 ";
 
 $joins = "
@@ -256,6 +267,7 @@ $joins = "
     LEFT JOIN user_accounts ua ON ua.user_id = r.requester_id
     LEFT JOIN user_students us ON us.user_id = r.requester_id
     LEFT JOIN user_staffs ust ON ust.user_id = r.requester_id
+    LEFT JOIN repair_process rp ON rp.request_id = r.request_id
 ";
 
 if ($is_staff) {
@@ -358,7 +370,12 @@ if ($is_staff) {
                 <p>กรุณากรอกข้อมูลอุปกรณ์หรือสถานที่ที่ต้องการแจ้งซ่อม</p>
             </div>
 
-            <a href="history.php" class="history-btn">📋 ประวัติการแจ้งซ่อม</a>
+            <div style="display:flex; gap:10px;">
+                <?php if ($is_technician): ?>
+                    <a href="technician.php" class="history-btn">🛠️ งานซ่อมที่รับผิดชอบ</a>
+                <?php endif; ?>
+                <a href="history.php" class="history-btn">📋 ประวัติการแจ้งซ่อม</a>
+            </div>
         </div>
 
         <!-- ================================================= -->
@@ -529,7 +546,7 @@ if ($is_staff) {
                         <?php if (!empty($recent_requests)): ?>
                             <?php foreach ($recent_requests as $request): ?>
                                 <?php
-                                $status = getRepairStatus($request['approved_by']);
+                                $status = getRepairStatus($request['approved_by'], $request['status_repair'] ?? null);
 
                                 // ชื่อผู้แจ้ง
                                 if (!empty($request['student_first_name'])) {

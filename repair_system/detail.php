@@ -7,7 +7,8 @@ $css_path   = "../css/repair.css";
 
 require_once "../config/db.php";
 
-// ตารางที่ใช้ในไฟล์นี้: repair_requests, classroom, user_accounts, user_students
+// ตารางที่ใช้ในไฟล์นี้: repair_requests, classroom, user_accounts,
+//                     user_students, repair_process, user_staffs
 // โครงสร้างตารางแบบเต็มดูได้ที่ database/schema.sql
 
 // =====================================================
@@ -100,13 +101,20 @@ $sql = "
         us.first_name_th AS student_first_name,
         us.last_name_th AS student_last_name,
 
-        approver_ua.username AS approver_username
+        approver_ua.username AS approver_username,
+
+        rp.status_repair, rp.repair_datetime, rp.status_datetime,
+        tech.title_name AS tech_title,
+        tech.first_name_th AS tech_first_name,
+        tech.last_name_th AS tech_last_name
 
     FROM repair_requests r
     INNER JOIN classroom c ON c.classroom_id = r.classroom_id
     LEFT JOIN user_accounts ua ON ua.user_id = r.requester_id
     LEFT JOIN user_students us ON us.user_id = r.requester_id
     LEFT JOIN user_accounts approver_ua ON approver_ua.user_id = r.approved_by
+    LEFT JOIN repair_process rp ON rp.request_id = r.request_id
+    LEFT JOIN user_staffs tech ON tech.staff_id = rp.staff_repair_id
     WHERE r.request_id = ?
     LIMIT 1
 ";
@@ -153,13 +161,25 @@ if (!empty($request['student_first_name'])) {
 // สถานะ
 // =====================================================
 
-if (!empty($request['approved_by'])) {
+if ($request['status_repair'] === 'done') {
+    $status       = "ซ่อมเสร็จสิ้น";
+    $status_class = "done";
+} elseif ($request['status_repair'] === 'repairing') {
+    $status       = "กำลังซ่อม";
+    $status_class = "repairing";
+} elseif (!empty($request['approved_by'])) {
     $status       = "อนุมัติแล้ว";
     $status_class = "approved";
 } else {
     $status       = "รอครูอนุมัติ";
     $status_class = "waiting";
 }
+
+$technician_name = trim(
+    ($request['tech_title'] ?? "") . " " .
+    ($request['tech_first_name'] ?? "") . " " .
+    ($request['tech_last_name'] ?? "")
+);
 
 // อนุมัติได้เฉพาะครูที่ปรึกษาของห้องนั้น ที่ไม่ใช่เจ้าของรายการเอง
 // และรายการยังไม่ถูกอนุมัติ
@@ -265,6 +285,36 @@ $can_approve = $is_advisor && !$is_owner && empty($request['approved_by']);
                     <div>
                         <strong>รอครูที่ปรึกษาอนุมัติ</strong>
                         <p>รายการนี้ยังไม่ได้รับการอนุมัติจากครูที่ปรึกษา</p>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($request['status_repair'] === 'repairing'): ?>
+                <div class="notice-box">
+                    <div class="notice-icon">🛠️</div>
+                    <div>
+                        <strong>กำลังดำเนินการซ่อม</strong>
+                        <p>
+                            เจ้าหน้าที่ผู้รับผิดชอบ: <?= e($technician_name ?: "-") ?><br>
+                            เริ่มซ่อมเมื่อ:
+                            <?= !empty($request['repair_datetime'])
+                                ? date("d/m/Y H:i", strtotime($request['repair_datetime']))
+                                : "-" ?>
+                        </p>
+                    </div>
+                </div>
+            <?php elseif ($request['status_repair'] === 'done'): ?>
+                <div class="notice-box">
+                    <div class="notice-icon">✅</div>
+                    <div>
+                        <strong>ซ่อมเสร็จสิ้น</strong>
+                        <p>
+                            เจ้าหน้าที่ผู้ซ่อม: <?= e($technician_name ?: "-") ?><br>
+                            เสร็จสิ้นเมื่อ:
+                            <?= !empty($request['status_datetime'])
+                                ? date("d/m/Y H:i", strtotime($request['status_datetime']))
+                                : "-" ?>
+                        </p>
                     </div>
                 </div>
             <?php endif; ?>
