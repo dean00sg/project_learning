@@ -8,5 +8,5 @@
 -- ข้อมูลผู้ใช้งาน (User Management)      -> database/users.sql          [ใช้ร่วมทุกระบบ: login/, user/, repair_system/, borrow_system/]
 -- ระบบแจ้งซ่อมอุปกรณ์ (Repair System)   -> database/repair_system.sql  [ใช้งานจริงแล้ว]
 -- ระบบยืมคืนอุปกรณ์ (Borrow System)      -> database/borrow_system.sql  [ใช้งานจริงแล้ว]
--- ระบบจัดการกิจกรรมนักเรียน               -> ยังไม่มีการพัฒนา (ไม่มีตารางในฐานข้อมูล)
+-- ระบบจัดการกิจกรรมนักเรียน               -> database/activity_system.sql [ใช้งานจริงแล้ว]
 -- ระบบจัดการห้องเรียน/ห้องสอบ             -> ยังไม่มีการพัฒนา (classroom อยู่ใน repair_system.sql ไปก่อน)

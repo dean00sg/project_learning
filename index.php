@@ -209,6 +209,32 @@ $css_path = "css/style.css";
 
             </a>
 
+            <a
+                href="api_demo/import_students.php"
+                class="menu-card"
+            >
+
+                <div class="menu-icon">
+                    ⇩
+                </div>
+
+
+                <div class="menu-title">
+
+                    นำเข้าข้อมูลนักเรียนจาก API
+
+                </div>
+
+
+                <div class="menu-detail">
+
+                    ดึงข้อมูลนักเรียนจาก API (ตัวอย่าง) เข้าฐานข้อมูล
+
+                </div>
+
+
+            </a>
+
         <?php } ?>
 
 
@@ -267,6 +293,37 @@ $css_path = "css/style.css";
             <div class="menu-detail">
 
                 ยืมและคืนอุปกรณ์
+
+            </div>
+
+
+        </a>
+
+
+        <!-- ==============================
+             ระบบจัดการกิจกรรมนักเรียน
+        =============================== -->
+
+        <a
+            href="activity_system/main.php"
+            class="menu-card"
+        >
+
+            <div class="menu-icon">
+                🎉
+            </div>
+
+
+            <div class="menu-title">
+
+                กิจกรรมนักเรียน
+
+            </div>
+
+
+            <div class="menu-detail">
+
+                สมัครและจัดการกิจกรรมนักเรียน
 
             </div>
 

@@ -1,0 +1,5 @@
+RewriteEngine On
+
+# /api/students  ->  api_demo/mock_students_api.php
+# (ทำให้ mock API มีหน้าตาเป็น path แบบ REST เหมือน API จริง)
+RewriteRule ^api/students/?$ api_demo/mock_students_api.php [L,QSA]
