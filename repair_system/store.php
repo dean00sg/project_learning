@@ -4,7 +4,8 @@ session_start();
 
 require_once "../config/db.php";
 
-// ตารางที่ใช้ในไฟล์นี้: user_accounts, user_students, classroom, repair_requests
+// ตารางที่ใช้ในไฟล์นี้: user_accounts, user_students, user_staffs,
+//                     classroom, repair_requests
 // โครงสร้างตารางแบบเต็มดูได้ที่ database/schema.sql
 
 // =====================================================
@@ -53,13 +54,17 @@ if (!in_array($request_type, $allowed_types, true)) {
 }
 
 // =====================================================
-// ตรวจ User (ไม่ใช้ staff_id)
+// ตรวจ User
 // =====================================================
 
 $sql = "
-    SELECT ua.user_id, ua.role, us.student_id, us.classroom_id AS student_classroom_id
+    SELECT
+        ua.user_id, ua.role,
+        us.student_id, us.classroom_id AS student_classroom_id,
+        ust.staff_id
     FROM user_accounts ua
     LEFT JOIN user_students us ON us.user_id = ua.user_id
+    LEFT JOIN user_staffs ust ON ust.user_id = ua.user_id
     WHERE ua.user_id = ?
     LIMIT 1
 ";
@@ -82,6 +87,32 @@ if (!empty($user['student_id'])) {
 
     if ($student_classroom_id <= 0 || $classroom_id !== $student_classroom_id) {
         fail('ไม่สามารถเลือกห้องเรียนอื่นได้');
+    }
+}
+
+// บุคลากรต้องแจ้งซ่อมเฉพาะห้องที่ตนเป็นครูที่ปรึกษาเท่านั้น
+if (!empty($user['staff_id'])) {
+    $sql = "
+        SELECT classroom_id
+        FROM classroom
+        WHERE
+            classroom_id = ?
+            AND advisor_staff_id IS NOT NULL
+            AND JSON_VALID(advisor_staff_id)
+            AND JSON_CONTAINS(advisor_staff_id, JSON_ARRAY(?))
+        LIMIT 1
+    ";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ii", $classroom_id, $user_id);
+    $stmt->execute();
+
+    $advised_classroom = $stmt->get_result()->fetch_assoc();
+
+    $stmt->close();
+
+    if (!$advised_classroom) {
+        fail('คุณไม่ได้เป็นครูที่ปรึกษาของห้องเรียนนี้');
     }
 }
 

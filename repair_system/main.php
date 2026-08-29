@@ -209,8 +209,8 @@ if ($is_student && !empty($user['student_classroom_id'])) {
 // =====================================================
 // ห้องสำหรับบุคลากร
 //
-// ตอนนี้ไม่ใช้ advisor_staff_id ให้เลือกห้องทั้งหมด
-// (เป็นห้องที่จะแจ้งซ่อมให้ ไม่ใช่สิทธิ์อนุมัติ)
+// แสดงเฉพาะห้องที่ตนเป็นครูที่ปรึกษา (advisor_staff_id)
+// เพราะเป็นห้องที่บุคลากรคนนี้ดูแลและแจ้งซ่อมแทนได้
 // =====================================================
 
 $all_classrooms = [];
@@ -219,15 +219,26 @@ if ($is_staff) {
     $sql = "
         SELECT classroom_id, classroom_number_code, classroom_level, building
         FROM classroom
+        WHERE
+            advisor_staff_id IS NOT NULL
+            AND JSON_VALID(advisor_staff_id)
+            AND JSON_CONTAINS(advisor_staff_id, JSON_ARRAY(?))
         ORDER BY classroom_level, classroom_number_code
     ";
 
-    $result = $conn->query($sql);
+    $stmt = $conn->prepare($sql);
 
-    if ($result) {
+    if ($stmt) {
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+
         while ($row = $result->fetch_assoc()) {
             $all_classrooms[] = $row;
         }
+
+        $stmt->close();
     }
 }
 
@@ -420,10 +431,12 @@ if ($is_staff) {
                                 value="<?= e($student_classroom['classroom_id'] ?? '') ?>"
                             >
 
-                        <?php elseif ($is_staff): ?>
+                        <?php elseif ($is_staff && !empty($all_classrooms)): ?>
 
                             <select name="classroom_id" required>
-                                <option value="">-- เลือกห้องเรียน --</option>
+                                <?php if (count($all_classrooms) > 1): ?>
+                                    <option value="">-- เลือกห้องเรียน --</option>
+                                <?php endif; ?>
                                 <?php foreach ($all_classrooms as $classroom): ?>
                                     <option value="<?= e($classroom['classroom_id']) ?>">
                                         <?= e($classroom['classroom_number_code']) ?>
@@ -433,6 +446,10 @@ if ($is_staff) {
                                     </option>
                                 <?php endforeach; ?>
                             </select>
+
+                        <?php elseif ($is_staff): ?>
+
+                            <input type="text" value="คุณไม่ได้เป็นครูที่ปรึกษาของห้องเรียนใด" readonly>
 
                         <?php else: ?>
 
