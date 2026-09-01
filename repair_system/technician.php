@@ -27,6 +27,23 @@ function e($value)
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
+function getClassroomLabel($type, $code, $level)
+{
+    $parts = [];
+
+    if (!empty($type)) {
+        $parts[] = $type;
+    }
+
+    $parts[] = $code;
+
+    if ($level !== null && $level !== '') {
+        $parts[] = "/ " . $level;
+    }
+
+    return implode(' ', $parts);
+}
+
 function getRequestTypeName($type)
 {
     $types = [
@@ -77,7 +94,7 @@ $sql = "
         r.request_id, r.request_type, r.repair_detail, r.request_image,
         r.approved_at,
 
-        c.classroom_number_code, c.building,
+        c.classroom_type, c.classroom_number_code, c.classroom_level, c.building,
 
         rp.status_repair, rp.repair_datetime,
 
@@ -211,7 +228,7 @@ if ($result) {
                                             ? date("d/m/Y H:i", strtotime($item['approved_at']))
                                             : "-" ?>
                                     </td>
-                                    <td><?= e($item['classroom_number_code'] ?? "-") ?></td>
+                                    <td><?= !empty($item['classroom_number_code']) ? e(getClassroomLabel($item['classroom_type'], $item['classroom_number_code'], $item['classroom_level'])) : "-" ?></td>
                                     <td><?= e($requester_name) ?></td>
                                     <td><?= e(getRequestTypeName($item['request_type'])) ?></td>
                                     <td><?= e(mb_strimwidth($item['repair_detail'] ?? "", 0, 50, "...")) ?></td>

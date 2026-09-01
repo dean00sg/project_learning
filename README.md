@@ -32,6 +32,7 @@ project_learning/
 ├── repair_system/           ระบบแจ้งซ่อมอุปกรณ์
 ├── borrow_system/           ระบบยืม-คืนอุปกรณ์
 ├── activity_system/         ระบบจัดการกิจกรรมนักเรียน
+├── classroom_system/         ระบบจัดห้องสอบ/ที่นั่งสอบ
 └── api_demo/                ตัวอย่าง mock API + โค้ดดึงข้อมูลเข้าฐานข้อมูล
 ```
 
@@ -44,6 +45,8 @@ project_learning/
 | `student` | นักเรียน | `user_students` (มี `classroom_id`, `student_code`) |
 | `staff` | บุคลากร/ครู | `user_staffs` (มี `staff_type_code` เช่น `teacher`, `technician`, `equipment_officer`) |
 | `admin` | ผู้ดูแลระบบ | ไม่มีตารางแยก ใช้ username แสดงชื่อแทน |
+
+**การแสดงชื่อห้องเรียน:** ทุกจุดที่แสดงห้องเรียน (homeroom) ใช้รูปแบบเดียวกันทั้งโปรเจกต์ผ่านฟังก์ชัน `getClassroomLabel($type, $code, $level)` (ก็อปไว้ในแต่ละไฟล์ที่ใช้ ตาม pattern เดิมของโปรเจกต์ที่ไม่มี include ฟังก์ชันร่วม) ผลลัพธ์คือ `{classroom_type} {classroom_number_code} / {classroom_level}` เช่น `มัธยม ม.1/1 / 1`
 
 ---
 
@@ -108,6 +111,31 @@ project_learning/
 
 ตาราง: `activities`, `activity_signups`, `activity_sessions`, `activity_attendance` (ดู `database/activity_system.sql`)
 
+## classroom_system/ — ระบบจัดการห้องเรียน/ห้องสอบ
+
+ครอบคลุม 2 ส่วน: **จัดการข้อมูลห้องเรียน** (CRUD ตาราง `classroom` ที่มีอยู่แล้ว) และ **จัดห้องสอบ/ที่นั่งสอบ**
+
+**Flow การสอบ:** staff/admin (ต้องมีข้อมูลบุคลากรในตาราง `user_staffs` ก่อน) สร้าง "การสอบ" (ชื่อ+ประเภท+วิชา+วันเวลา) พร้อมเพิ่มห้องสอบได้หลายห้องในฟอร์มเดียว (room_code/ความจุ/กรรมการคุมสอบ — ไม่ผูกกับตาราง `classroom` เพราะห้องสอบอาจเป็นห้องพิเศษ) → ไปหน้ารายละเอียด เลือกห้องเรียน (homeroom) ที่ต้องเข้าสอบแล้วกด "จัดที่นั่งอัตโนมัติ" (กระจายแบบ round-robin กันคนห้องเดียวกันนั่งติดกัน, กดซ้ำ = จัดใหม่ทับของเดิม) → วันสอบจริงบันทึกสถานะเข้าสอบ/ขาดสอบ+หมายเหตุรายห้อง
+
+**สิทธิ์:** ครูที่ปรึกษาดูได้อย่างเดียว (รายชื่อนักเรียนห้องตน + ผลสอบ) — ผู้จัดการทั้งหมด (สร้าง/จัดห้อง/จัดที่นั่ง/บันทึกผล) คือผู้สร้างการสอบเองหรือแอดมิน
+
+| ไฟล์ | หน้าที่ |
+|---|---|
+| `classroom_main.php` | รายการห้องเรียนทั้งหมด + ครูที่ปรึกษา |
+| `classroom_create.php` / `classroom_store.php` | เพิ่มห้องเรียนใหม่ |
+| `classroom_edit.php` / `classroom_update.php` | แก้ไขห้องเรียน (รวมครูที่ปรึกษา) |
+| `classroom_students.php` | รายชื่อนักเรียนในห้อง (read-only) |
+| `main.php` | Dashboard แยกตาม role: แอดมิน (ภาพรวมทั้งระบบ), staff (การสอบที่สร้าง), ครูที่ปรึกษา (ห้องที่ดูแล), นักเรียน (ตารางสอบตัวเอง) |
+| `create.php` / `store.php` | สร้างการสอบ + เพิ่มห้องสอบหลายห้องในฟอร์มเดียว (JS เพิ่ม/ลบแถว, เลือกห้องจาก dropdown ที่มีอยู่แล้วหรือพิมพ์เองก็ได้) |
+| `detail.php` | รายละเอียดการสอบ — การ์ด "เช็คชื่อเข้าสอบ" อยู่บนสุดของหน้า (กดตรงเข้าห้องได้ทันที) + สรุปห้องสอบ + จัดนักเรียนเข้าห้องสอบ + แก้ไข/ยกเลิกการสอบ |
+| `edit.php` / `update.php` | แก้ไขข้อมูลการสอบ (ชื่อ/ประเภท/วิชา/วันเวลา/รายละเอียด) |
+| `edit_room.php` / `update_room.php` | แก้ไขห้องสอบทีละห้อง (ลดความจุต่ำกว่าจำนวนที่จัดที่นั่งไปแล้วไม่ได้) |
+| `assign_students.php` | จัดที่นั่งอัตโนมัติ (round-robin, ตรวจความจุ, ล็อกด้วย transaction, กดซ้ำแทนที่ของเดิม) |
+| `room_roster.php` / `update_attendance.php` | รายชื่อ+บันทึกสถานะเข้าสอบ/ขาดสอบรายห้อง |
+| `update_exam_status.php` | ยกเลิกการสอบ |
+
+ตาราง: `exam`, `exam_rooms`, `exam_students` (ดู `database/classroom_system.sql`) — `exam.created_by`/`exam_rooms.supervisor_staff_id` ผูกกับ `user_staffs.staff_id`, `exam_students.student_id` ผูกกับ `user_students.student_id` โดยตรง (ไม่ผ่าน `user_accounts`)
+
 ## api_demo/ — ตัวอย่างดึงข้อมูลจาก API ภายนอก
 
 ตัวอย่างสำหรับฝึก/ใช้อ้างอิงเวลาข้อสอบมี API ข้อมูลนักเรียนมาให้จริง — จำลอง API + เขียนโค้ดดึงข้อมูลเข้าฐานข้อมูล แยกกันคนละไฟล์ตามหน้าที่
@@ -124,7 +152,7 @@ project_learning/
 
 - `config/db.php` — จุดเชื่อมต่อฐานข้อมูลกลาง (`$conn` แบบ mysqli) ทุกไฟล์ `require_once` จากตรงนี้
 - `includes/head.php` — `<head>` ที่ใช้ร่วมกันทุกหน้า (รับ `$page_title`, `$css_path` จากไฟล์ที่ include)
-- `css/` — 1 ไฟล์ต่อ 1 ระบบ (`style.css` ใช้กับหน้าแรก, `login.css`, `user.css`, `repair.css`, `borrow.css`, `activity.css`)
+- `css/` — 1 ไฟล์ต่อ 1 ระบบ (`style.css` ใช้กับหน้าแรก, `login.css`, `user.css`, `repair.css`, `borrow.css`, `activity.css`, `classroom.css`)
 
 ## database/
 
@@ -135,9 +163,6 @@ project_learning/
 | `repair_system.sql` | `classroom`, `repair_requests`, `repair_process` |
 | `borrow_system.sql` | `equipment_item`, `borrow_requests` |
 | `activity_system.sql` | `activities`, `activity_signups`, `activity_sessions`, `activity_attendance` |
+| `classroom_system.sql` | `exam`, `exam_rooms`, `exam_students` |
 
-ลำดับการ import: `users.sql` → `repair_system.sql` (มี `classroom` ที่ระบบอื่นอ้างอิงถึง) → `borrow_system.sql` → `activity_system.sql`
-
-## ระบบที่ยังไม่ได้พัฒนา
-
-- **ระบบจัดการห้องเรียน/ห้องสอบ** — มีลิงก์เมนูใน `index.php` (`classroom_system/main.php`) แล้ว แต่ยังไม่มีโฟลเดอร์/ไฟล์จริง ตอนนี้ตาราง `classroom` ฝากไว้ที่ `database/repair_system.sql` ก่อน
+ลำดับการ import: `users.sql` → `repair_system.sql` (มี `classroom` ที่ระบบอื่นอ้างอิงถึง) → `borrow_system.sql` → `activity_system.sql` → `classroom_system.sql`

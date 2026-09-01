@@ -22,6 +22,23 @@ function e($value)
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
+function getClassroomLabel($type, $code, $level)
+{
+    $parts = [];
+
+    if (!empty($type)) {
+        $parts[] = $type;
+    }
+
+    $parts[] = $code;
+
+    if ($level !== null && $level !== '') {
+        $parts[] = "/ " . $level;
+    }
+
+    return implode(' ', $parts);
+}
+
 function getBorrowTypeName($type)
 {
     $types = [
@@ -73,7 +90,7 @@ $select_columns = "
 
     ei.item_code, ei.item_name,
 
-    c.classroom_number_code,
+    c.classroom_type, c.classroom_number_code, c.classroom_level,
 
     ua.username,
 
@@ -211,7 +228,7 @@ $stmt->close();
                                     <td>
                                         <?= e(getBorrowTypeName($request['borrow_type'])) ?>
                                         <?php if (!empty($request['classroom_number_code'])): ?>
-                                            (<?= e($request['classroom_number_code']) ?>)
+                                            (<?= e(getClassroomLabel($request['classroom_type'], $request['classroom_number_code'], $request['classroom_level'])) ?>)
                                         <?php endif; ?>
                                     </td>
                                     <td><span class="status <?= e($status_class) ?>"><?= e($status_text) ?></span></td>

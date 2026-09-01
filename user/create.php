@@ -14,6 +14,46 @@ if (
     exit;
 }
 
+require_once "../config/db.php";
+
+// ตารางที่ใช้ในไฟล์นี้: classroom
+// โครงสร้างตารางแบบเต็มดูได้ที่ database/repair_system.sql
+
+function e($value)
+{
+    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+}
+
+function getClassroomLabel($type, $code, $level)
+{
+    $parts = [];
+
+    if (!empty($type)) {
+        $parts[] = $type;
+    }
+
+    $parts[] = $code;
+
+    if ($level !== null && $level !== '') {
+        $parts[] = "/ " . $level;
+    }
+
+    return implode(' ', $parts);
+}
+
+$classrooms = [];
+$result = $conn->query("
+    SELECT classroom_id, classroom_type, classroom_number_code, classroom_level
+    FROM classroom
+    ORDER BY classroom_level, classroom_number_code
+");
+
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        $classrooms[] = $row;
+    }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -359,10 +399,14 @@ if (
                         ชั้นเรียน
                     </label>
 
-                    <input
-                        type="text"
-                        name="classroom_id"
-                    >
+                    <select name="classroom_id">
+                        <option value="">-- เลือกห้องเรียน --</option>
+                        <?php foreach ($classrooms as $c): ?>
+                            <option value="<?= e($c['classroom_id']) ?>">
+                                <?= e(getClassroomLabel($c['classroom_type'], $c['classroom_number_code'], $c['classroom_level'])) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
 
                 </div>
 

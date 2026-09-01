@@ -32,6 +32,23 @@ function e($value)
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
+function getClassroomLabel($type, $code, $level)
+{
+    $parts = [];
+
+    if (!empty($type)) {
+        $parts[] = $type;
+    }
+
+    $parts[] = $code;
+
+    if ($level !== null && $level !== '') {
+        $parts[] = "/ " . $level;
+    }
+
+    return implode(' ', $parts);
+}
+
 function getBorrowTypeName($type)
 {
     $types = [
@@ -55,7 +72,7 @@ $sql = "
 
         ei.item_code, ei.item_name,
 
-        c.classroom_number_code,
+        c.classroom_type, c.classroom_number_code, c.classroom_level,
 
         ua.username,
 
@@ -199,7 +216,7 @@ $can_notify_return = $is_owner && empty($request['return_requested_at']) && empt
                 <label>ลักษณะการใช้งาน</label>
                 <input
                     type="text"
-                    value="<?= e(getBorrowTypeName($request['borrow_type'])) ?><?= !empty($request['classroom_number_code']) ? ' (ห้อง ' . e($request['classroom_number_code']) . ')' : '' ?>"
+                    value="<?= e(getBorrowTypeName($request['borrow_type'])) ?><?= !empty($request['classroom_number_code']) ? ' (ห้อง ' . e(getClassroomLabel($request['classroom_type'], $request['classroom_number_code'], $request['classroom_level'])) . ')' : '' ?>"
                     readonly
                 >
             </div>

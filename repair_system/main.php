@@ -31,6 +31,23 @@ function e($value)
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
+function getClassroomLabel($type, $code, $level)
+{
+    $parts = [];
+
+    if (!empty($type)) {
+        $parts[] = $type;
+    }
+
+    $parts[] = $code;
+
+    if ($level !== null && $level !== '') {
+        $parts[] = "/ " . $level;
+    }
+
+    return implode(' ', $parts);
+}
+
 function getRequestTypeName($type)
 {
     $types = [
@@ -188,7 +205,7 @@ if ($is_student && !empty($user['student_classroom_id'])) {
     $classroom_id = (int)$user['student_classroom_id'];
 
     $sql = "
-        SELECT classroom_id, classroom_number_code, classroom_level, building
+        SELECT classroom_id, classroom_type, classroom_number_code, classroom_level, building
         FROM classroom
         WHERE classroom_id = ?
         LIMIT 1
@@ -217,7 +234,7 @@ $all_classrooms = [];
 
 if ($is_staff) {
     $sql = "
-        SELECT classroom_id, classroom_number_code, classroom_level, building
+        SELECT classroom_id, classroom_type, classroom_number_code, classroom_level, building
         FROM classroom
         WHERE
             advisor_staff_id IS NOT NULL
@@ -258,7 +275,7 @@ $select_columns = "
     r.request_datetime, r.repair_detail, r.request_image,
     r.approved_by, r.approved_at,
 
-    c.classroom_number_code, c.classroom_level, c.building, c.advisor_staff_id,
+    c.classroom_type, c.classroom_number_code, c.classroom_level, c.building, c.advisor_staff_id,
 
     ua.username AS requester_username,
 
@@ -422,7 +439,7 @@ if ($is_staff) {
 
                             <input
                                 type="text"
-                                value="<?= e($student_classroom['classroom_number_code'] ?? 'ไม่พบห้องเรียน') ?>"
+                                value="<?= $student_classroom ? e(getClassroomLabel($student_classroom['classroom_type'], $student_classroom['classroom_number_code'], $student_classroom['classroom_level'])) : 'ไม่พบห้องเรียน' ?>"
                                 readonly
                             >
                             <input
@@ -439,7 +456,7 @@ if ($is_staff) {
                                 <?php endif; ?>
                                 <?php foreach ($all_classrooms as $classroom): ?>
                                     <option value="<?= e($classroom['classroom_id']) ?>">
-                                        <?= e($classroom['classroom_number_code']) ?>
+                                        <?= e(getClassroomLabel($classroom['classroom_type'], $classroom['classroom_number_code'], $classroom['classroom_level'])) ?>
                                         <?php if (!empty($classroom['building'])): ?>
                                             - <?= e($classroom['building']) ?>
                                         <?php endif; ?>
@@ -597,7 +614,7 @@ if ($is_staff) {
                                             : "-" ?>
                                     </td>
                                     <td><?= e($display_requester) ?></td>
-                                    <td><?= e($request['classroom_number_code'] ?? "-") ?></td>
+                                    <td><?= !empty($request['classroom_number_code']) ? e(getClassroomLabel($request['classroom_type'], $request['classroom_number_code'], $request['classroom_level'])) : "-" ?></td>
                                     <td><?= e(getRequestTypeName($request['request_type'])) ?></td>
                                     <td><?= e(mb_strimwidth($request['repair_detail'] ?? "", 0, 50, "...")) ?></td>
                                     <td><span class="status <?= e($status['class']) ?>"><?= e($status['text']) ?></span></td>

@@ -23,6 +23,23 @@ function e($value)
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
+function getClassroomLabel($type, $code, $level)
+{
+    $parts = [];
+
+    if (!empty($type)) {
+        $parts[] = $type;
+    }
+
+    $parts[] = $code;
+
+    if ($level !== null && $level !== '') {
+        $parts[] = "/ " . $level;
+    }
+
+    return implode(' ', $parts);
+}
+
 function getTypeName($type)
 {
     $types = [
@@ -87,7 +104,7 @@ if ($is_student) {
             r.request_id, r.request_type, r.request_datetime, r.repair_detail,
             r.request_image, r.approved_by, r.approved_at,
 
-            c.classroom_number_code,
+            c.classroom_type, c.classroom_number_code, c.classroom_level,
 
             us.title_name, us.first_name_th, us.last_name_th,
 
@@ -116,7 +133,7 @@ if ($is_student) {
             r.request_id, r.request_type, r.request_datetime, r.repair_detail,
             r.request_image, r.approved_by, r.approved_at, r.requester_id,
 
-            c.classroom_number_code,
+            c.classroom_type, c.classroom_number_code, c.classroom_level,
 
             us.title_name AS student_title,
             us.first_name_th AS student_first_name,
@@ -252,7 +269,7 @@ $stmt->close();
                                             : "-" ?>
                                     </td>
                                     <td><?= e($requester) ?></td>
-                                    <td><?= e($request['classroom_number_code'] ?? "-") ?></td>
+                                    <td><?= !empty($request['classroom_number_code']) ? e(getClassroomLabel($request['classroom_type'], $request['classroom_number_code'], $request['classroom_level'])) : "-" ?></td>
                                     <td><?= e(getTypeName($request['request_type'])) ?></td>
                                     <td><?= e(mb_strimwidth($request['repair_detail'] ?? "", 0, 60, "...")) ?></td>
                                     <td><span class="status <?= e($status_class) ?>"><?= e($status_text) ?></span></td>

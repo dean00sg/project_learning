@@ -16,8 +16,38 @@ if (
 
 require_once "../config/db.php";
 
-// ตารางที่ใช้ในไฟล์นี้: user_accounts, user_students, user_staffs
+// ตารางที่ใช้ในไฟล์นี้: user_accounts, user_students, user_staffs, classroom
 // โครงสร้างตารางแบบเต็มดูได้ที่ database/schema.sql
+
+function getClassroomLabel($type, $code, $level)
+{
+    $parts = [];
+
+    if (!empty($type)) {
+        $parts[] = $type;
+    }
+
+    $parts[] = $code;
+
+    if ($level !== null && $level !== '') {
+        $parts[] = "/ " . $level;
+    }
+
+    return implode(' ', $parts);
+}
+
+$classrooms = [];
+$result = $conn->query("
+    SELECT classroom_id, classroom_type, classroom_number_code, classroom_level
+    FROM classroom
+    ORDER BY classroom_level, classroom_number_code
+");
+
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        $classrooms[] = $row;
+    }
+}
 
 
 // ========================================
@@ -596,13 +626,17 @@ if ($user["role"] == "staff") {
                         ชั้นเรียน
                     </label>
 
-                    <input
-                        type="text"
-                        name="classroom_id"
-                        value="<?= htmlspecialchars(
-                            $person["classroom_id"] ?? ""
-                        ) ?>"
-                    >
+                    <select name="classroom_id">
+                        <option value="">-- เลือกห้องเรียน --</option>
+                        <?php foreach ($classrooms as $c): ?>
+                            <option
+                                value="<?= htmlspecialchars($c['classroom_id']) ?>"
+                                <?= (string)$c['classroom_id'] === (string)($person["classroom_id"] ?? "") ? 'selected' : '' ?>
+                            >
+                                <?= htmlspecialchars(getClassroomLabel($c['classroom_type'], $c['classroom_number_code'], $c['classroom_level'])) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
 
                 </div>
 

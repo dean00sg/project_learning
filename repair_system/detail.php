@@ -36,6 +36,23 @@ function e($value)
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
+function getClassroomLabel($type, $code, $level)
+{
+    $parts = [];
+
+    if (!empty($type)) {
+        $parts[] = $type;
+    }
+
+    $parts[] = $code;
+
+    if ($level !== null && $level !== '') {
+        $parts[] = "/ " . $level;
+    }
+
+    return implode(' ', $parts);
+}
+
 function getTypeName($type)
 {
     $types = [
@@ -92,7 +109,7 @@ $sql = "
         r.request_id, r.request_type, r.requester_id, r.request_datetime,
         r.repair_detail, r.request_image, r.approved_by, r.approved_at,
 
-        c.classroom_id, c.classroom_number_code, c.classroom_level,
+        c.classroom_id, c.classroom_type, c.classroom_number_code, c.classroom_level,
         c.building, c.advisor_staff_id,
 
         ua.username,
@@ -223,7 +240,7 @@ $can_approve = $is_advisor && !$is_owner && empty($request['approved_by']);
 
             <div class="form-group">
                 <label>ห้องเรียน</label>
-                <input type="text" value="<?= e($request['classroom_number_code'] ?? "-") ?>" readonly>
+                <input type="text" value="<?= !empty($request['classroom_number_code']) ? e(getClassroomLabel($request['classroom_type'], $request['classroom_number_code'], $request['classroom_level'])) : "-" ?>" readonly>
             </div>
 
             <div class="form-group">

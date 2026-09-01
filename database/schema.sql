@@ -9,4 +9,4 @@
 -- ระบบแจ้งซ่อมอุปกรณ์ (Repair System)   -> database/repair_system.sql  [ใช้งานจริงแล้ว]
 -- ระบบยืมคืนอุปกรณ์ (Borrow System)      -> database/borrow_system.sql  [ใช้งานจริงแล้ว]
 -- ระบบจัดการกิจกรรมนักเรียน               -> database/activity_system.sql [ใช้งานจริงแล้ว]
--- ระบบจัดการห้องเรียน/ห้องสอบ             -> ยังไม่มีการพัฒนา (classroom อยู่ใน repair_system.sql ไปก่อน)
+-- ระบบจัดการห้องเรียน/ห้องสอบ             -> database/classroom_system.sql [ใช้งานจริงแล้ว] (ตาราง classroom อยู่ใน repair_system.sql)
