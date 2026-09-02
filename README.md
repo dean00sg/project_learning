@@ -33,6 +33,7 @@ project_learning/
 ├── borrow_system/           ระบบยืม-คืนอุปกรณ์
 ├── activity_system/         ระบบจัดการกิจกรรมนักเรียน
 ├── classroom_system/         ระบบจัดห้องสอบ/ที่นั่งสอบ
+├── leave_system/              ระบบลา/ขออนุญาตนักเรียน
 └── api_demo/                ตัวอย่าง mock API + โค้ดดึงข้อมูลเข้าฐานข้อมูล
 ```
 
@@ -136,6 +137,25 @@ project_learning/
 
 ตาราง: `exam`, `exam_rooms`, `exam_students` (ดู `database/classroom_system.sql`) — `exam.created_by`/`exam_rooms.supervisor_staff_id` ผูกกับ `user_staffs.staff_id`, `exam_students.student_id` ผูกกับ `user_students.student_id` โดยตรง (ไม่ผ่าน `user_accounts`)
 
+## leave_system/ — ระบบลา/ขออนุญาตนักเรียน
+
+**Flow:** นักเรียนยื่นคำขอ (เลือกประเภทการลา + วันที่ + เหตุผล + เอกสารประกอบถ้ามี) → ครูที่ปรึกษาของห้องนักเรียนคนนั้นอนุมัติ/ไม่อนุมัติก่อนเสมอ → ถ้าประเภทการลานั้นตั้งค่า `requires_discipline_approval = 1` (เช่น "ขออนุญาตออกนอกโรงเรียน") จะต้องผ่าน**ครูฝ่ายปกครอง** (`staff_type_code = 'discipline'`) อนุมัติซ้อนอีกชั้นก่อนถึงจะอนุมัติสมบูรณ์ — ประเภทอื่น (ลาป่วย/ลากิจ) อนุมัติสมบูรณ์ทันทีที่ครูที่ปรึกษาอนุมัติ
+
+**สถานะ:** `PENDING_ADVISOR` → (`PENDING_DISCIPLINE` เฉพาะประเภทที่ต้องผ่าน 2 ชั้น) → `APPROVED` | `REJECTED` | `CANCELLED` (นักเรียนยกเลิกเองได้ก่อนอนุมัติ)
+
+| ไฟล์ | หน้าที่ |
+|---|---|
+| `main.php` | Dashboard แยกตาม role: นักเรียน (คำขอตัวเอง), ครูที่ปรึกษา (คิวรออนุมัติห้องตน), ครูฝ่ายปกครอง (คิวรออนุมัติขั้น 2), staff/admin (สถิติรวม + กราฟตามประเภท) |
+| `create.php` / `store.php` | นักเรียนสร้างคำขอ (แนบเอกสารได้) |
+| `detail.php` | รายละเอียดคำขอ + timeline ขั้นตอนอนุมัติ + ปุ่มอนุมัติ/ไม่อนุมัติ/ยกเลิกตามสิทธิ์ |
+| `approve_advisor.php` | ครูที่ปรึกษาอนุมัติ/ไม่อนุมัติ (เช็คสิทธิ์จาก `classroom.advisor_staff_id`) |
+| `approve_discipline.php` | ครูฝ่ายปกครองอนุมัติ/ไม่อนุมัติ (เฉพาะคำขอที่ผ่านครูที่ปรึกษาแล้ว) |
+| `cancel.php` | นักเรียนยกเลิกคำขอของตัวเอง (เฉพาะที่ยังไม่อนุมัติ) |
+| `history.php` | ประวัติคำขอทั้งหมด (นักเรียนเห็นเฉพาะของตัวเอง, staff/admin เห็นทั้งหมด) |
+| `types_main.php` ฯลฯ | CRUD ประเภทการลา (staff/admin) — ตั้งค่าว่าประเภทไหนต้องผ่านฝ่ายปกครองด้วย |
+
+ตาราง: `leave_types`, `leave_requests` (ดู `database/leave_system.sql`) — `leave_requests.student_id` ผูกกับ `user_students.student_id`, `advisor_approved_by`/`discipline_approved_by` ผูกกับ `user_accounts.user_id`
+
 ## api_demo/ — ตัวอย่างดึงข้อมูลจาก API ภายนอก
 
 ตัวอย่างสำหรับฝึก/ใช้อ้างอิงเวลาข้อสอบมี API ข้อมูลนักเรียนมาให้จริง — จำลอง API + เขียนโค้ดดึงข้อมูลเข้าฐานข้อมูล แยกกันคนละไฟล์ตามหน้าที่
@@ -152,7 +172,7 @@ project_learning/
 
 - `config/db.php` — จุดเชื่อมต่อฐานข้อมูลกลาง (`$conn` แบบ mysqli) ทุกไฟล์ `require_once` จากตรงนี้
 - `includes/head.php` — `<head>` ที่ใช้ร่วมกันทุกหน้า (รับ `$page_title`, `$css_path` จากไฟล์ที่ include)
-- `css/` — 1 ไฟล์ต่อ 1 ระบบ (`style.css` ใช้กับหน้าแรก, `login.css`, `user.css`, `repair.css`, `borrow.css`, `activity.css`, `classroom.css`)
+- `css/` — 1 ไฟล์ต่อ 1 ระบบ (`style.css` ใช้กับหน้าแรก, `login.css`, `user.css`, `repair.css`, `borrow.css`, `activity.css`, `classroom.css`, `leave.css`)
 
 ## database/
 
@@ -164,5 +184,6 @@ project_learning/
 | `borrow_system.sql` | `equipment_item`, `borrow_requests` |
 | `activity_system.sql` | `activities`, `activity_signups`, `activity_sessions`, `activity_attendance` |
 | `classroom_system.sql` | `exam`, `exam_rooms`, `exam_students` |
+| `leave_system.sql` | `leave_types`, `leave_requests` (มีข้อมูลตัวอย่าง 4 ประเภทการลาติดมาด้วย) |
 
-ลำดับการ import: `users.sql` → `repair_system.sql` (มี `classroom` ที่ระบบอื่นอ้างอิงถึง) → `borrow_system.sql` → `activity_system.sql` → `classroom_system.sql`
+ลำดับการ import: `users.sql` → `repair_system.sql` (มี `classroom` ที่ระบบอื่นอ้างอิงถึง) → `borrow_system.sql` → `activity_system.sql` → `classroom_system.sql` → `leave_system.sql`

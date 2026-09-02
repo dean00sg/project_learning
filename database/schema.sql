@@ -10,3 +10,4 @@
 -- ระบบยืมคืนอุปกรณ์ (Borrow System)      -> database/borrow_system.sql  [ใช้งานจริงแล้ว]
 -- ระบบจัดการกิจกรรมนักเรียน               -> database/activity_system.sql [ใช้งานจริงแล้ว]
 -- ระบบจัดการห้องเรียน/ห้องสอบ             -> database/classroom_system.sql [ใช้งานจริงแล้ว] (ตาราง classroom อยู่ใน repair_system.sql)
+-- ระบบลา/ขออนุญาตนักเรียน                 -> database/leave_system.sql [ใช้งานจริงแล้ว]
