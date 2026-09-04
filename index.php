@@ -393,6 +393,37 @@ $css_path = "css/style.css";
         </a>
 
 
+        <!-- ==============================
+             ระบบตารางสอน + เช็คชื่อเข้าเรียน
+        =============================== -->
+
+        <a
+            href="attendance_system/main.php"
+            class="menu-card"
+        >
+
+            <div class="menu-icon">
+                ✅
+            </div>
+
+
+            <div class="menu-title">
+
+                เช็คชื่อเข้าเรียน
+
+            </div>
+
+
+            <div class="menu-detail">
+
+                ตารางสอน + เช็คชื่อเข้าเรียนรายคาบ
+
+            </div>
+
+
+        </a>
+
+
     </div>
 
 

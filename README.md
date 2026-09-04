@@ -156,6 +156,24 @@ project_learning/
 
 ตาราง: `leave_types`, `leave_requests` (ดู `database/leave_system.sql`) — `leave_requests.student_id` ผูกกับ `user_students.student_id`, `advisor_approved_by`/`discipline_approved_by` ผูกกับ `user_accounts.user_id`
 
+## attendance_system/ — ระบบตารางสอน + เช็คชื่อเข้าเรียนรายคาบ
+
+**Flow:** ฝ่ายวิชาการ/แอดมินสร้าง "ตารางสอน" ผูกครูผู้สอน+ห้องเรียน+วัน/เวลาไว้ล่วงหน้า → ครูผู้สอนเช็คชื่อนักเรียนตามคาบของตัวเองได้ทุกวัน (เลือกวันที่ย้อนหลัง/ล่วงหน้าได้) → ถ้านักเรียนมีใบลาที่ `APPROVED` ครอบคลุมวันนั้น (ดู `leave_system/`) ระบบจะบังคับสถานะเป็น "ลา" ให้อัตโนมัติ ครูแก้ไม่ได้ (กันขัดแย้งกับผลอนุมัติใบลา)
+
+**สถานะ:** `PRESENT` (มา) | `LATE` (สาย) | `ABSENT` (ขาด) | `LEAVE` (ลา — มาจากใบลาอนุมัติเท่านั้น ห้ามครูตั้งเอง)
+
+| ไฟล์ | หน้าที่ |
+|---|---|
+| `main.php` | Dashboard แยกตาม role: ครูผู้สอน (คาบเรียนของตัวเอง + จำนวนที่เช็คแล้ววันนี้), นักเรียน (สรุปสถิติ 4 สถานะ + ประวัติล่าสุด) |
+| `schedule_main.php` | รายการตารางสอนทั้งหมด (staff/admin) |
+| `schedule_create.php` / `schedule_store.php` | เพิ่มคาบเรียนใหม่ |
+| `schedule_edit.php` / `schedule_update.php` | แก้ไขคาบเรียน (เปิด/ปิดใช้งานได้) |
+| `take.php` | เช็คชื่อนักเรียนตามคาบ+วันที่ที่เลือก — เฉพาะครูผู้สอนคาบนั้นหรือแอดมิน, นักเรียนที่มีใบลาอนุมัติจะถูกบังคับเป็น "ลา" ในหน้านี้เลย (แก้ไม่ได้) |
+| `store_attendance.php` | บันทึกผลเช็คชื่อทีละคน (เช็คซ้ำวันเดิม = อัปเดตแถวเดิม, ตรวจใบลาอนุมัติซ้ำอีกรอบกันแก้ผ่าน request ตรงๆ) |
+| `history.php` | ประวัติการเช็คชื่อ (ครูเห็นทุกคาบที่ตนสอน, นักเรียนเห็นเฉพาะของตัวเอง) |
+
+ตาราง: `class_schedule`, `attendance` (ดู `database/attendance_system.sql`) — `class_schedule.classroom_id` ผูกกับ `classroom.classroom_id`, `class_schedule.staff_id`/`attendance.checked_by` ผูกกับ `user_accounts.user_id`, `attendance.student_id` ผูกกับ `user_students.student_id`, `attendance.leave_request_id` ผูกกับ `leave_requests.request_id`
+
 ## api_demo/ — ตัวอย่างดึงข้อมูลจาก API ภายนอก
 
 ตัวอย่างสำหรับฝึก/ใช้อ้างอิงเวลาข้อสอบมี API ข้อมูลนักเรียนมาให้จริง — จำลอง API + เขียนโค้ดดึงข้อมูลเข้าฐานข้อมูล แยกกันคนละไฟล์ตามหน้าที่
@@ -172,7 +190,7 @@ project_learning/
 
 - `config/db.php` — จุดเชื่อมต่อฐานข้อมูลกลาง (`$conn` แบบ mysqli) ทุกไฟล์ `require_once` จากตรงนี้
 - `includes/head.php` — `<head>` ที่ใช้ร่วมกันทุกหน้า (รับ `$page_title`, `$css_path` จากไฟล์ที่ include)
-- `css/` — 1 ไฟล์ต่อ 1 ระบบ (`style.css` ใช้กับหน้าแรก, `login.css`, `user.css`, `repair.css`, `borrow.css`, `activity.css`, `classroom.css`, `leave.css`)
+- `css/` — 1 ไฟล์ต่อ 1 ระบบ (`style.css` ใช้กับหน้าแรก, `login.css`, `user.css`, `repair.css`, `borrow.css`, `activity.css`, `classroom.css`, `leave.css`, `attendance.css`)
 
 ## database/
 
@@ -185,5 +203,6 @@ project_learning/
 | `activity_system.sql` | `activities`, `activity_signups`, `activity_sessions`, `activity_attendance` |
 | `classroom_system.sql` | `exam`, `exam_rooms`, `exam_students` |
 | `leave_system.sql` | `leave_types`, `leave_requests` (มีข้อมูลตัวอย่าง 4 ประเภทการลาติดมาด้วย) |
+| `attendance_system.sql` | `class_schedule`, `attendance` |
 
-ลำดับการ import: `users.sql` → `repair_system.sql` (มี `classroom` ที่ระบบอื่นอ้างอิงถึง) → `borrow_system.sql` → `activity_system.sql` → `classroom_system.sql` → `leave_system.sql`
+ลำดับการ import: `users.sql` → `repair_system.sql` (มี `classroom` ที่ระบบอื่นอ้างอิงถึง) → `borrow_system.sql` → `activity_system.sql` → `classroom_system.sql` → `leave_system.sql` → `attendance_system.sql` (อ้างอิง `leave_requests` ผ่าน `attendance.leave_request_id`)
